@@ -660,22 +660,14 @@ export type Database = {
     };
     Enums: {
       account_status:
-        | "active"
-        | "deactivated"
-        | "suspended"
-        | "pending_deletion";
+        "active" | "deactivated" | "suspended" | "pending_deletion";
       availability_status: "offline" | "available" | "hidden";
       distance_band:
         | "TOUT_PRES"
         | "MOINS_DE_500_M"
         | "ENTRE_500_M_ET_1_KM"
         | "DANS_TON_SECTEUR";
-      gender:
-        | "woman"
-        | "man"
-        | "non_binary"
-        | "other"
-        | "prefer_not_to_say";
+      gender: "woman" | "man" | "non_binary" | "other" | "prefer_not_to_say";
       like_status: "pending" | "matched" | "cancelled" | "expired";
       match_status: "active" | "ended" | "blocked";
       moderation_action_type:
@@ -713,18 +705,14 @@ export type Database = {
 
 type PublicSchema = Database["public"];
 
-export type Tables<
-  TableName extends keyof PublicSchema["Tables"],
-> = PublicSchema["Tables"][TableName]["Row"];
+export type Tables<TableName extends keyof PublicSchema["Tables"]> =
+  PublicSchema["Tables"][TableName]["Row"];
 
-export type TablesInsert<
-  TableName extends keyof PublicSchema["Tables"],
-> = PublicSchema["Tables"][TableName]["Insert"];
+export type TablesInsert<TableName extends keyof PublicSchema["Tables"]> =
+  PublicSchema["Tables"][TableName]["Insert"];
 
-export type TablesUpdate<
-  TableName extends keyof PublicSchema["Tables"],
-> = PublicSchema["Tables"][TableName]["Update"];
+export type TablesUpdate<TableName extends keyof PublicSchema["Tables"]> =
+  PublicSchema["Tables"][TableName]["Update"];
 
-export type Enums<
-  EnumName extends keyof PublicSchema["Enums"],
-> = PublicSchema["Enums"][EnumName];
+export type Enums<EnumName extends keyof PublicSchema["Enums"]> =
+  PublicSchema["Enums"][EnumName];

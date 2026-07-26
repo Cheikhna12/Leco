@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  birthDateSchema,
-  profileBioSchema,
-} from "@/lib/validation/profile";
+import { birthDateSchema, profileBioSchema } from "@/lib/validation/profile";
 
 describe("profile validation", () => {
   it("enforces the 150 character bio limit", () => {

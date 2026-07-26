@@ -48,7 +48,8 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --font-body: "Avenir Next", "Nunito Sans", "Segoe UI", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-display:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --ease-gentle: cubic-bezier(0.22, 1, 0.36, 1);
 }
 

@@ -10,16 +10,16 @@ Les portraits de démonstration sont abstraits et autonomes afin de ne pas intro
 
 Les tokens sont définis dans `src/components/ui/foundations.css`, puis chargés par `src/app/globals.css`. Les styles de composition sont séparés entre découverte et navigation afin de garder chaque feuille focalisée.
 
-| Rôle | Token principal | Usage |
-| --- | --- | --- |
-| Fond | `--background` | Toile ivoire ou charbon chaud |
-| Surface | `--surface-raised` | Cartes et navigation |
-| Texte | `--foreground` | Prune sombre ou ivoire |
-| Texte secondaire | `--foreground-soft` | Métadonnées |
-| Action | `--accent` | CTA et disponibilité |
-| Succès / présence | `--success` | Présence et confidentialité |
-| Bordure | `--border` | Séparation douce |
-| Focus | `--focus` | Anneau clavier à contraste élevé |
+| Rôle              | Token principal     | Usage                            |
+| ----------------- | ------------------- | -------------------------------- |
+| Fond              | `--background`      | Toile ivoire ou charbon chaud    |
+| Surface           | `--surface-raised`  | Cartes et navigation             |
+| Texte             | `--foreground`      | Prune sombre ou ivoire           |
+| Texte secondaire  | `--foreground-soft` | Métadonnées                      |
+| Action            | `--accent`          | CTA et disponibilité             |
+| Succès / présence | `--success`         | Présence et confidentialité      |
+| Bordure           | `--border`          | Séparation douce                 |
+| Focus             | `--focus`           | Anneau clavier à contraste élevé |
 
 L’échelle d’espacement est basée sur 4 px. Les rayons `sm`, `md`, `lg` et `pill` ne doivent pas être redéfinis dans les composants.
 

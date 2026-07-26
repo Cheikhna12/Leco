@@ -45,18 +45,18 @@ describe("migration PostgreSQL/PostGIS initiale", () => {
       /on public\.user_locations using gist \(location\)/i,
     );
     expect(migration).toMatch(/user_id uuid primary key/i);
-    expect(migration).toMatch(/delete from public\.user_locations[\s\S]*expires_at <=/i);
+    expect(migration).toMatch(
+      /delete from public\.user_locations[\s\S]*expires_at <=/i,
+    );
   });
 
   it("ne retourne aucune coordonnée dans la découverte", () => {
     const discoverySignature = migration.match(
-      /create or replace function public\.get_nearby_profiles[\s\S]*?\)\nlanguage plpgsql/i,
+      /create or replace function public\.get_nearby_profiles[\s\S]*?\)\r?\nlanguage plpgsql/i,
     )?.[0];
 
     expect(discoverySignature).toBeDefined();
-    expect(discoverySignature).toContain(
-      "distance_band public.distance_band",
-    );
+    expect(discoverySignature).toContain("distance_band public.distance_band");
     expect(discoverySignature).not.toMatch(
       /^\s*(latitude|longitude|location|distance_m)\s+/im,
     );

@@ -35,20 +35,20 @@ la même paire.
 
 ## Tables et invariants
 
-| Table | Rôle | Invariants principaux |
-| --- | --- | --- |
-| `profiles` | Profil lié 1:1 à `auth.users` | 18 ans minimum, bio ≤ 150 caractères, téléphone absent, suspension/désactivation explicites |
-| `profile_photos` | Références Cloudinary | 2 à 4 pour compléter le profil, positions 1 à 4 uniques, URL HTTPS |
-| `interests`, `user_interests` | Référentiel et choix | 2 à 3 choix pour compléter le profil, maximum 3 garanti en base |
-| `user_locations` | Une position exacte courante | `geography(Point,4326)`, expiration ≤ 30 min, index GiST, aucun historique |
-| `user_presence` | Disponibilité courante | mood obligatoire si disponible, heartbeat frais ≤ 5 min pour la découverte |
-| `likes` | Intentions « Dire bonjour » | pas d’auto-like, une intention `pending` par direction, 5/heure |
-| `matches` | Relation mutuelle | paire canonique unique, création atomique |
-| `messages` | Texte et emoji uniquement | 1 à 2 000 caractères, match actif, membres non bloqués, hash anti-duplication |
-| `blocks` | Blocage directionnel | paire unique ; annule immédiatement les likes et désactive le match |
-| `reports` | File de signalements | catégorie normalisée, contexte match/message optionnel, décision traçable |
-| `moderation_actions` | Décisions de modération | modérateur, cible, justification et expiration éventuelle |
-| `audit_logs` | Journal administratif | append-only, métadonnées JSON sans PII |
+| Table                         | Rôle                          | Invariants principaux                                                                       |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| `profiles`                    | Profil lié 1:1 à `auth.users` | 18 ans minimum, bio ≤ 150 caractères, téléphone absent, suspension/désactivation explicites |
+| `profile_photos`              | Références Cloudinary         | 2 à 4 pour compléter le profil, positions 1 à 4 uniques, URL HTTPS                          |
+| `interests`, `user_interests` | Référentiel et choix          | 2 à 3 choix pour compléter le profil, maximum 3 garanti en base                             |
+| `user_locations`              | Une position exacte courante  | `geography(Point,4326)`, expiration ≤ 30 min, index GiST, aucun historique                  |
+| `user_presence`               | Disponibilité courante        | mood obligatoire si disponible, heartbeat frais ≤ 5 min pour la découverte                  |
+| `likes`                       | Intentions « Dire bonjour »   | pas d’auto-like, une intention `pending` par direction, 5/heure                             |
+| `matches`                     | Relation mutuelle             | paire canonique unique, création atomique                                                   |
+| `messages`                    | Texte et emoji uniquement     | 1 à 2 000 caractères, match actif, membres non bloqués, hash anti-duplication               |
+| `blocks`                      | Blocage directionnel          | paire unique ; annule immédiatement les likes et désactive le match                         |
+| `reports`                     | File de signalements          | catégorie normalisée, contexte match/message optionnel, décision traçable                   |
+| `moderation_actions`          | Décisions de modération       | modérateur, cible, justification et expiration éventuelle                                   |
+| `audit_logs`                  | Journal administratif         | append-only, métadonnées JSON sans PII                                                      |
 
 Les minima de 2 photos et 2 intérêts sont pris en compte par
 `is_profile_complete`. Ils ne sont pas imposés pendant l’onboarding afin de
@@ -124,15 +124,15 @@ client nécessaires sont accordées à `authenticated`; le nettoyage est accord�
 
 ## Rétention et suppression
 
-| Donnée | Règle MVP | Mécanisme |
-| --- | --- | --- |
-| Position exacte | 15 min normalement, 30 min au maximum | remplacement 1:1 et purge chaque minute |
-| Présence/mood | jusqu’à 4 h, hors ligne après 5 min sans heartbeat | filtre synchrone + job d’expiration |
-| Likes non résolus | 30 jours recommandé | futur job marquant `expired` |
-| Messages | durée du compte ou obligation de sécurité | suppression logique avant purge contrôlée |
-| Signalements et preuves | 24 mois recommandé après clôture | procédure Trust & Safety à ajouter |
-| Audit administratif | 24 mois minimum recommandé | table append-only, purge privilégiée à formaliser |
-| Compte demandé supprimé | délai de grâce à définir juridiquement | `pending_deletion`, puis procédure serveur dédiée |
+| Donnée                  | Règle MVP                                          | Mécanisme                                         |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------------- |
+| Position exacte         | 15 min normalement, 30 min au maximum              | remplacement 1:1 et purge chaque minute           |
+| Présence/mood           | jusqu’à 4 h, hors ligne après 5 min sans heartbeat | filtre synchrone + job d’expiration               |
+| Likes non résolus       | 30 jours recommandé                                | futur job marquant `expired`                      |
+| Messages                | durée du compte ou obligation de sécurité          | suppression logique avant purge contrôlée         |
+| Signalements et preuves | 24 mois recommandé après clôture                   | procédure Trust & Safety à ajouter                |
+| Audit administratif     | 24 mois minimum recommandé                         | table append-only, purge privilégiée à formaliser |
+| Compte demandé supprimé | délai de grâce à définir juridiquement             | `pending_deletion`, puis procédure serveur dédiée |
 
 Les durées « recommandé » doivent être validées avec le conseil juridique et
 implémentées avant la production. Une suppression physique directe de

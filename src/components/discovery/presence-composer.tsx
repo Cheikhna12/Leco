@@ -17,14 +17,22 @@ export function PresenceComposer() {
         </div>
         <label className="presence-switch">
           <span className="sr-only">Activer ma disponibilité</span>
-          <input aria-describedby="presence-preview-note" disabled type="checkbox" />
+          <input
+            aria-describedby="presence-preview-note"
+            disabled
+            type="checkbox"
+          />
           <span aria-hidden="true" />
         </label>
       </div>
       <p className="presence-card__prompt">Tu es dans quel mood ?</p>
       <div aria-label="Choix du mood — aperçu" className="mood-list">
         {moods.map((mood, index) => (
-          <Badge aria-disabled="true" key={mood} tone={index === 0 ? "coral" : "neutral"}>
+          <Badge
+            aria-disabled="true"
+            key={mood}
+            tone={index === 0 ? "coral" : "neutral"}
+          >
             {mood}
           </Badge>
         ))}

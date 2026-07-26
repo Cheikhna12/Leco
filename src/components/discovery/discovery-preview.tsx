@@ -54,7 +54,8 @@ export function DiscoveryPreview() {
             comment ?
           </h1>
           <p className="discovery-header__intro">
-            Découvre les personnes disponibles maintenant, selon leur vibe — jamais selon leurs coordonnées exactes.
+            Découvre les personnes disponibles maintenant, selon leur vibe —
+            jamais selon leurs coordonnées exactes.
           </p>
         </div>
         <div aria-hidden="true" className="sun-mark">
@@ -66,13 +67,23 @@ export function DiscoveryPreview() {
 
       <PresenceComposer />
 
-      <section aria-labelledby="nearby-title" className="nearby-section" id="decouvrir">
+      <section
+        aria-labelledby="nearby-title"
+        className="nearby-section"
+        id="decouvrir"
+      >
         <div className="section-heading">
           <div>
             <p className="eyebrow">Maintenant autour de toi</p>
             <h2 id="nearby-title">Les vibes du moment</h2>
           </div>
-          <Button aria-label="Filtrer les profils — aperçu" disabled size="icon" title="Aperçu UI" variant="secondary">
+          <Button
+            aria-label="Filtrer les profils — aperçu"
+            disabled
+            size="icon"
+            title="Aperçu UI"
+            variant="secondary"
+          >
             <SlidersIcon />
           </Button>
         </div>
@@ -81,7 +92,10 @@ export function DiscoveryPreview() {
           <ShieldIcon />
           <p>
             <strong>Distance approximative uniquement.</strong>
-            <span> Ton adresse et ta position exacte ne sont jamais affichées.</span>
+            <span>
+              {" "}
+              Ton adresse et ta position exacte ne sont jamais affichées.
+            </span>
           </p>
         </div>
 
@@ -91,7 +105,12 @@ export function DiscoveryPreview() {
           ))}
         </div>
 
-        <Button aria-disabled="true" className="refresh-button" disabled variant="quiet">
+        <Button
+          aria-disabled="true"
+          className="refresh-button"
+          disabled
+          variant="quiet"
+        >
           <RefreshIcon />
           Rafraîchir les vibes
         </Button>

@@ -15,11 +15,17 @@ export interface DiscoveryProfile {
 }
 
 export function ProfileCard({ profile }: { profile: DiscoveryProfile }) {
-  const { age, distance, firstName, initials, interests, mood, note, tone } = profile;
+  const { age, distance, firstName, initials, interests, mood, note, tone } =
+    profile;
 
   return (
     <article className="person-card">
-      <Avatar initials={initials} label={`Portrait illustré de ${firstName}`} online tone={tone} />
+      <Avatar
+        initials={initials}
+        label={`Portrait illustré de ${firstName}`}
+        online
+        tone={tone}
+      />
       <div className="person-card__body">
         <div className="person-card__heading">
           <div>
@@ -34,7 +40,10 @@ export function ProfileCard({ profile }: { profile: DiscoveryProfile }) {
           <Badge tone="lilac">{mood}</Badge>
         </div>
         <p className="person-card__note">{note}</p>
-        <ul aria-label={`Centres d’intérêt de ${firstName}`} className="interest-list">
+        <ul
+          aria-label={`Centres d’intérêt de ${firstName}`}
+          className="interest-list"
+        >
           {interests.map((interest) => (
             <li key={interest}>{interest}</li>
           ))}

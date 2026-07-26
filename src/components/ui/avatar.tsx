@@ -9,7 +9,12 @@ interface AvatarProps {
   tone?: AvatarTone;
 }
 
-export function Avatar({ initials, label, online = false, tone = "coral" }: AvatarProps) {
+export function Avatar({
+  initials,
+  label,
+  online = false,
+  tone = "coral",
+}: AvatarProps) {
   return (
     <span
       aria-label={`${label}${online ? ", disponible maintenant" : ""}`}

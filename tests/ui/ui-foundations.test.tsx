@@ -8,7 +8,9 @@ import { LoadingState, StatePanel } from "@/components/ui/states";
 
 describe("UI foundations", () => {
   it("exposes native button semantics and variants", () => {
-    const markup = renderToStaticMarkup(<Button variant="secondary">Continuer</Button>);
+    const markup = renderToStaticMarkup(
+      <Button variant="secondary">Continuer</Button>,
+    );
 
     expect(markup).toContain('type="button"');
     expect(markup).toContain("button--secondary");
@@ -18,7 +20,11 @@ describe("UI foundations", () => {
   it("announces loading and error states", () => {
     const loading = renderToStaticMarkup(<LoadingState />);
     const error = renderToStaticMarkup(
-      <StatePanel description="Réessaie dans un instant." kind="error" title="Connexion interrompue" />,
+      <StatePanel
+        description="Réessaie dans un instant."
+        kind="error"
+        title="Connexion interrompue"
+      />,
     );
 
     expect(loading).toContain('aria-busy="true"');

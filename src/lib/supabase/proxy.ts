@@ -1,10 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-import {
-  getPublicSupabaseConfig,
-  hasPublicSupabaseConfig,
-} from "./config";
+import { getPublicSupabaseConfig, hasPublicSupabaseConfig } from "./config";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });

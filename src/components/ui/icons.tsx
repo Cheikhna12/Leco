@@ -36,7 +36,13 @@ export function SparkIcon(props: IconProps) {
 export function CompassIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <circle cx="12" cy="12" r="8.75" stroke="currentColor" strokeWidth="1.75" />
+      <circle
+        cx="12"
+        cy="12"
+        r="8.75"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
       <path
         d="m14.9 8.4-1.62 4.88-4.88 1.63 1.62-4.89L14.9 8.4Z"
         stroke="currentColor"
@@ -56,7 +62,12 @@ export function ChatIcon(props: IconProps) {
         strokeLinejoin="round"
         strokeWidth="1.75"
       />
-      <path d="M8 8h8M8 11.25h5" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+      <path
+        d="M8 8h8M8 11.25h5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.75"
+      />
     </IconFrame>
   );
 }
@@ -64,7 +75,13 @@ export function ChatIcon(props: IconProps) {
 export function UserIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <circle cx="12" cy="8.25" r="3.75" stroke="currentColor" strokeWidth="1.75" />
+      <circle
+        cx="12"
+        cy="8.25"
+        r="3.75"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
       <path
         d="M4.75 20c.54-3.56 3.25-5.75 7.25-5.75S18.71 16.44 19.25 20"
         stroke="currentColor"
@@ -78,7 +95,12 @@ export function UserIcon(props: IconProps) {
 export function SlidersIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <path d="M4 7h10M18 7h2M4 17h2M10 17h10" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+      <path
+        d="M4 7h10M18 7h2M4 17h2M10 17h10"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.75"
+      />
       <circle cx="16" cy="7" r="2" stroke="currentColor" strokeWidth="1.75" />
       <circle cx="8" cy="17" r="2" stroke="currentColor" strokeWidth="1.75" />
     </IconFrame>
@@ -108,7 +130,13 @@ export function ShieldIcon(props: IconProps) {
         strokeLinejoin="round"
         strokeWidth="1.7"
       />
-      <path d="m8.75 11.85 2.08 2.08 4.42-4.42" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" />
+      <path
+        d="m8.75 11.85 2.08 2.08 4.42-4.42"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
     </IconFrame>
   );
 }
@@ -116,8 +144,19 @@ export function ShieldIcon(props: IconProps) {
 export function RefreshIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <path d="M19.25 7.4V3.75h-3.65M4.75 16.6v3.65H8.4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" />
-      <path d="M18.4 10a7 7 0 0 0-11.93-3.53L4.75 8.2M5.6 14a7 7 0 0 0 11.93 3.53l1.72-1.72" stroke="currentColor" strokeLinecap="round" strokeWidth="1.75" />
+      <path
+        d="M19.25 7.4V3.75h-3.65M4.75 16.6v3.65H8.4"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.75"
+      />
+      <path
+        d="M18.4 10a7 7 0 0 0-11.93-3.53L4.75 8.2M5.6 14a7 7 0 0 0 11.93 3.53l1.72-1.72"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.75"
+      />
     </IconFrame>
   );
 }
@@ -125,8 +164,18 @@ export function RefreshIcon(props: IconProps) {
 export function AlertIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <path d="M12 3.25 21 19H3l9-15.75Z" stroke="currentColor" strokeLinejoin="round" strokeWidth="1.7" />
-      <path d="M12 8v5.25M12 16.7v.05" stroke="currentColor" strokeLinecap="round" strokeWidth="1.9" />
+      <path
+        d="M12 3.25 21 19H3l9-15.75Z"
+        stroke="currentColor"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M12 8v5.25M12 16.7v.05"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.9"
+      />
     </IconFrame>
   );
 }
@@ -134,7 +183,13 @@ export function AlertIcon(props: IconProps) {
 export function ArrowIcon(props: IconProps) {
   return (
     <IconFrame {...props}>
-      <path d="M5 12h13M14 7l5 5-5 5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      <path
+        d="M5 12h13M14 7l5 5-5 5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
     </IconFrame>
   );
 }

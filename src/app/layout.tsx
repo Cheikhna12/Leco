@@ -6,7 +6,8 @@ import { AppProviders } from "@/app/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  description: "Découvre qui est disponible maintenant autour de toi, selon sa vibe.",
+  description:
+    "Découvre qui est disponible maintenant autour de toi, selon sa vibe.",
   title: {
     default: "Leco — Ça bouge comment ?",
     template: "%s · Leco",
@@ -22,7 +23,9 @@ export const viewport: Viewport = {
   width: "device-width",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="fr">
       <body>
