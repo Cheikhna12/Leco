@@ -15,6 +15,12 @@
 .DS_Store
 *.pem
 *.log
+.codex/
+.hallmark/
+__pycache__/
+*.py[cod]
+/supabase/.branches/
+/supabase/.temp/
 
 # environment files
 .env

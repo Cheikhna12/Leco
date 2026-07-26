@@ -1,13 +1,19 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const browserChannel =
+  process.env.PLAYWRIGHT_CHANNEL ??
+  (process.platform === "win32" ? "msedge" : undefined);
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
+  workers: 1,
   use: {
     baseURL: "http://127.0.0.1:3000",
+    ...(browserChannel ? { channel: browserChannel } : {}),
     trace: "on-first-retry",
   },
   projects: [

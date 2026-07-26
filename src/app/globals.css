@@ -1,4 +1,3 @@
+@import "../../tokens.css";
 @import "tailwindcss";
-@import "../components/ui/foundations.css";
-@import "../components/discovery/discovery.css";
-@import "../components/navigation/navigation.css";
+@import "../components/experience/experience.css";

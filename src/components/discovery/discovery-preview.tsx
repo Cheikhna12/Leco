@@ -1,84 +1,100 @@
+"use client";
+
+import { useState } from "react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { RefreshIcon, ShieldIcon, SlidersIcon } from "@/components/ui/icons";
+import { RefreshIcon, SlidersIcon } from "@/components/ui/icons";
 import { StatePanel } from "@/components/ui/states";
 
 import { PresenceComposer } from "./presence-composer";
 import { ProfileCard, type DiscoveryProfile } from "./profile-card";
+import { ProximityField } from "./proximity-field";
 
 const previewProfiles: DiscoveryProfile[] = [
   {
     age: 24,
     distance: "Tout près",
     firstName: "Awa",
+    id: "awa",
     initials: "AW",
     interests: ["Afrobeats", "Brunch", "Design"],
     mood: "On peut causer",
-    note: "Partante pour un jus et une bonne conversation, sans programme compliqué.",
+    note: "Un jus, une terrasse et une conversation sans programme compliqué.",
     tone: "coral",
   },
   {
     age: 27,
     distance: "Dans ton secteur",
     firstName: "Yann",
+    id: "yann",
     initials: "YN",
     interests: ["Basket", "Cinéma", "Cuisine"],
     mood: "Sortir",
-    note: "Je cherche un plan posé après le boulot. Une terrasse et on improvise.",
+    note: "Après le boulot : une terrasse calme, puis on improvise.",
     tone: "apricot",
   },
   {
     age: 23,
-    distance: "À moins d’1 km",
+    distance: "À moins d’un km",
     firstName: "Mariam",
+    id: "mariam",
     initials: "MA",
     interests: ["Photo", "Garba", "Concerts"],
     mood: "Manger",
-    note: "Une nouvelle adresse à tester et quelques photos de la ville au passage.",
+    note: "Une nouvelle adresse à tester, appareil photo à portée de main.",
     tone: "lilac",
   },
 ];
 
-export function DiscoveryPreview() {
+export function DiscoveryPreview({
+  onOpenVibe,
+}: {
+  onOpenVibe?: () => void;
+} = {}) {
+  const [selectedId, setSelectedId] = useState(previewProfiles[0].id);
+  const selectedProfile =
+    previewProfiles.find((profile) => profile.id === selectedId) ??
+    previewProfiles[0];
+
   return (
-    <div className="discovery-shell">
-      <header className="discovery-header">
-        <div>
-          <Badge className="preview-badge" tone="coral">
-            Aperçu UI · données fictives
-          </Badge>
-          <p className="eyebrow">Dimanche, Abidjan</p>
-          <h1>
-            Ça bouge
-            <br />
-            comment ?
-          </h1>
-          <p className="discovery-header__intro">
-            Découvre les personnes disponibles maintenant, selon leur vibe —
-            jamais selon leurs coordonnées exactes.
+    <section
+      aria-label="Découverte"
+      className="app-surface app-surface--discover"
+    >
+      <div className="surface-meta">
+        <Badge tone="coral">Aperçu UI · données fictives</Badge>
+        <span>Dimanche soir · Abidjan</span>
+      </div>
+
+      <PresenceComposer onOpenVibe={onOpenVibe} />
+
+      <div className="discovery-workbench">
+        <ProximityField
+          onSelect={setSelectedId}
+          selectedId={selectedProfile.id}
+        />
+        <aside aria-label="Profil sélectionné" className="profile-focus">
+          <div className="profile-focus__heading">
+            <span className="surface-label">Sélection</span>
+            <p>Une présence, le contexte utile, rien de plus.</p>
+          </div>
+          <ProfileCard featured profile={selectedProfile} selected />
+          <p className="profile-focus__privacy">
+            Le bonjour ouvre une demande privée. Aucun message n’est envoyé sans
+            ton geste.
           </p>
-        </div>
-        <div aria-hidden="true" className="sun-mark">
-          <span />
-          <strong>18</strong>
-          <small>dispos</small>
-        </div>
-      </header>
+        </aside>
+      </div>
 
-      <PresenceComposer />
-
-      <section
-        aria-labelledby="nearby-title"
-        className="nearby-section"
-        id="decouvrir"
-      >
+      <section aria-labelledby="nearby-title" className="nearby-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Maintenant autour de toi</p>
-            <h2 id="nearby-title">Les vibes du moment</h2>
+            <h2 id="nearby-title">Présences à proximité</h2>
+            <p>Triées par disponibilité, jamais par coordonnées exactes.</p>
           </div>
           <Button
-            aria-label="Filtrer les profils — aperçu"
+            aria-label="Filtrer les présences — aperçu"
             disabled
             size="icon"
             title="Aperçu UI"
@@ -88,20 +104,15 @@ export function DiscoveryPreview() {
           </Button>
         </div>
 
-        <div className="privacy-note">
-          <ShieldIcon />
-          <p>
-            <strong>Distance approximative uniquement.</strong>
-            <span>
-              {" "}
-              Ton adresse et ta position exacte ne sont jamais affichées.
-            </span>
-          </p>
-        </div>
-
         <div className="profile-list">
           {previewProfiles.map((profile) => (
-            <ProfileCard key={profile.firstName} profile={profile} />
+            <ProfileCard
+              compact
+              key={profile.id}
+              onSelect={() => setSelectedId(profile.id)}
+              profile={profile}
+              selected={profile.id === selectedProfile.id}
+            />
           ))}
         </div>
 
@@ -117,21 +128,21 @@ export function DiscoveryPreview() {
       </section>
 
       <details className="states-preview">
-        <summary>Voir les états d’interface prévus</summary>
+        <summary>États de service prévus</summary>
         <div className="states-preview__grid">
           <StatePanel
             description="Active une vibe ou élargis tes préférences pour voir du monde."
             kind="empty"
-            title="C’est calme par ici"
+            title="Aucune présence disponible"
           />
           <StatePanel
             actionLabel="Réessayer"
-            description="La connexion a fait une petite pause. Tes données restent en sécurité."
+            description="La connexion a été interrompue. Réessaie; tes données restent privées."
             kind="error"
-            title="On se retrouve juste après"
+            title="La mise à jour n’a pas abouti"
           />
         </div>
       </details>
-    </div>
+    </section>
   );
 }

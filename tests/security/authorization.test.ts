@@ -5,6 +5,7 @@ import {
   requireActiveMatchMember,
   requireAdminMfa,
   requireAuthenticated,
+  requireModerationPermission,
   requireOwnership,
   type SessionIdentity,
 } from "@/lib/security";
@@ -49,6 +50,28 @@ describe("authorization primitives", () => {
       aal: "aal2",
     };
     expect(requireAdminMfa(admin)).toBe(admin);
+  });
+
+  it("scopes moderator permissions and requires aal2", () => {
+    const moderator: SessionIdentity = {
+      ...user,
+      aal: "aal2",
+      permissions: ["reports:read"],
+      role: "moderator",
+    };
+
+    expect(requireModerationPermission(moderator, "reports:read")).toBe(
+      moderator,
+    );
+    expect(() =>
+      requireModerationPermission(moderator, "reports:write"),
+    ).toThrowError(expect.objectContaining({ code: "MODERATOR_MFA_REQUIRED" }));
+    expect(() =>
+      requireModerationPermission(
+        { ...moderator, aal: "aal1" },
+        "reports:read",
+      ),
+    ).toThrowError(expect.objectContaining({ code: "MODERATOR_MFA_REQUIRED" }));
   });
 
   it("authorizes only active, unblocked match members", () => {

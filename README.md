@@ -6,56 +6,133 @@ maintenant selon leur humeur, sans exposer leur position exacte.
 
 ## État du projet
 
-La vague 1 est terminée :
+La vague 1 fournit :
 
-- socle Next.js App Router, TypeScript strict et Tailwind CSS ;
-- clients Supabase navigateur, serveur et administrateur ;
-- schéma PostgreSQL/PostGIS, migrations et seed ;
-- politiques RLS de moindre privilège ;
-- design system mobile-first et aperçu de découverte ;
-- helpers de sécurité, validation, redaction et rate limiting ;
-- 63 tests unitaires et statiques ;
-- build de production validé.
+- Next.js App Router, TypeScript strict et Tailwind CSS ;
+- schéma PostgreSQL 15/PostGIS, migrations reproductibles et seed ;
+- politiques RLS forcées et RPC `security definer` à privilèges minimaux ;
+- tests pgTAP réels pour les identités, RLS, RPC, blocages et la concurrence ;
+- rate limiting atomique PostgreSQL et adaptateur serveur Supabase ;
+- helpers de validation, autorisation, headers et redaction ;
+- interface mobile-first utilisant uniquement des données fictives signalées.
 
-L’interface présente actuellement des données fictives clairement signalées.
-L’authentification, l’onboarding et la présence réelle commencent en vague 2.
+L’authentification, l’onboarding et la géolocalisation produit restent le
+périmètre de la vague 2.
 
-## Démarrage
+## Prérequis
 
-Prérequis : Node.js 20.19 ou supérieur et npm.
+- Node.js 20.19 ou supérieur ;
+- npm ;
+- Docker Desktop avec le moteur Linux démarré ;
+- environ 3 Go d’espace libre au premier téléchargement des images Supabase ;
+- ports locaux `3000`, `54321`, `54322`, `54323` et `54324` disponibles.
+
+Vérifier l’environnement :
 
 ```powershell
-Copy-Item .env.example .env.local
+node --version
+docker version
+npx supabase --version
+```
+
+## Installation et démarrage local
+
+```powershell
 npm install
+Copy-Item .env.example .env.local
+npx supabase start
+npx supabase db reset
 npm run dev
 ```
 
-L’application est ensuite disponible sur `http://localhost:3000`. L’aperçu UI
-fonctionne sans projet Supabase configuré.
+L’application est disponible sur `http://localhost:3000` et Supabase Studio sur
+`http://127.0.0.1:54323`.
 
-## Commandes
+`supabase db reset` recrée la base, applique dans l’ordre toutes les migrations
+de `supabase/migrations`, puis exécute `supabase/seed.sql`. Cette commande
+supprime les données de la base locale uniquement.
+
+## Variables d’environnement locales
+
+Après `npx supabase start`, exécuter `npx supabase status` et reporter dans
+`.env.local` uniquement les valeurs locales nécessaires :
 
 ```text
-npm run dev             Serveur local
-npm run build           Build de production
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clé publique locale>
+SUPABASE_SERVICE_ROLE_KEY=<clé service locale, serveur uniquement>
+SUPABASE_DB_URL=<URL PostgreSQL locale>
+RATE_LIMIT_HMAC_SECRET=<secret local aléatoire d’au moins 32 caractères>
+```
+
+Ne jamais préfixer une clé service ou un secret par `NEXT_PUBLIC_`. Ne jamais
+committer `.env.local`, un OTP, un JWT, une clé Cloudinary ou des coordonnées.
+
+## Validation de la base
+
+```powershell
+npx supabase db reset
+npx supabase db lint
+npx supabase db lint --schema public,private --fail-on error
+npm run test:db:local
+```
+
+Le lint global peut signaler des faux positifs dans les fonctions fournies par
+l’extension PostGIS. Le lint strict des schémas applicatifs `public,private`
+doit retourner zéro erreur. Les tests pgTAP valident les permissions sur la base
+réelle et exécutent des appels concurrents via plusieurs connexions PostgreSQL.
+
+## Commandes principales
+
+```text
+npm run dev             Serveur Next.js local
 npm run typecheck       TypeScript strict
 npm run lint            ESLint
-npm run test            Suite Vitest complète
-npm run test:database   Contrôles statiques SQL/PostGIS
-npm run test:security   Tests sécurité et RLS
-npm run test:ui         Tests des fondations UI
-npm run check           TypeScript + ESLint + tests
 npm run format:check    Vérification Prettier
+npm run test            Suite Vitest
+npm run test:e2e        Smoke tests Playwright
+npm run test:database   Contrôles statiques des migrations
+npm run test:db:local   Tests pgTAP réels sur Supabase local
+npm run test:security   Tests des helpers de sécurité
+npm run build           Build Next.js de production
+npm run db:start        Démarrage Supabase
+npm run db:reset        Réinitialisation locale et migrations
+npm run db:lint         Lint de tous les schémas
+npm run db:lint:strict  Lint bloquant de public et private
+npm run db:stop         Arrêt Supabase
+npm run validate:wave1  Validation locale complète
 ```
 
-Avec Docker Desktop actif et suffisamment d’espace disque :
+Les commandes demandées peuvent également être lancées directement :
 
-```text
-npm run db:start
-npm run db:reset
-npm run db:lint
-npm run db:stop
+```powershell
+npm install
+npx supabase start
+npx supabase db reset
+npx supabase db lint
+npm run dev
+npm run typecheck
+npm run lint
+npm run test
+npm run build
 ```
+
+## Erreurs fréquentes
+
+- `Cannot connect to the Docker daemon` : démarrer Docker Desktop et attendre
+  que `docker version` affiche une section `Server`.
+- Port déjà utilisé : arrêter l’ancien projet Supabase avec
+  `npx supabase stop`, puis relancer.
+- Migration en erreur : lire la première erreur SQL, corriger par une nouvelle
+  migration si elle a déjà été publiée, puis relancer `npx supabase db reset`.
+- Avertissements `extensions.st_findextent` ou `populate_geometry_columns` :
+  relancer le lint strict `--schema public,private`; ne pas modifier PostGIS.
+- Login téléphone désactivé : configurer un fournisseur SMS local avant les
+  tests OTP de la vague 2.
+- Navigateur Playwright absent : définir `PLAYWRIGHT_CHANNEL=msedge` sur
+  Windows ou exécuter `npx playwright install chromium` si l’espace disque le
+  permet.
 
 ## Architecture
 
@@ -75,12 +152,17 @@ src/
 supabase/
 ├── migrations/
 │   ├── 0001_initial_schema.sql
-│   └── 0002_rls_policies.sql
+│   ├── 0002_rls_policies.sql
+│   └── 0003_wave1_security_hardening.sql
+├── tests/
+│   ├── wave1_rls_and_rpc.sql
+│   └── wave1_concurrency.sql
 ├── config.toml
 └── seed.sql
 
 tests/
 ├── database/
+├── e2e/
 ├── security/
 ├── ui/
 └── unit/
@@ -90,15 +172,6 @@ Les décisions détaillées se trouvent dans `docs/architecture.md`,
 `docs/database.md`, `docs/security.md` et `docs/design-system.md`. Le bilan
 complet de la vague est dans `docs/wave-1-summary.md`.
 
-## Variables d’environnement
-
-Copier `.env.example` vers `.env.local` et renseigner uniquement les services
-utilisés. Ne jamais committer `.env.local`.
-
-La clé `SUPABASE_SERVICE_ROLE_KEY`, les secrets Cloudinary, SMS, CAPTCHA et le
-secret HMAC de rate limiting sont exclusivement côté serveur. Le navigateur ne
-reçoit que les variables préfixées par `NEXT_PUBLIC_`.
-
 ## Sécurité
 
 - `user_locations` n’accorde aucun accès direct au client.
@@ -106,18 +179,16 @@ reçoit que les variables préfixées par `NEXT_PUBLIC_`.
 - Les RPC sensibles sont `security definer`, fixent leur `search_path` et ont
   des droits d’exécution explicites.
 - Les tables exposées activent et forcent RLS.
+- Les modérateurs exigent `aal2` et une permission `app_metadata` explicite.
+- Le rate limiting utilise un compteur PostgreSQL partagé et atomique, appelé
+  uniquement côté serveur avec une clé HMAC opaque.
 - La CSP est actuellement en mode `Report-Only` jusqu’à la propagation des
   nonces et la validation Sentry/PostHog.
-- Un stockage durable et atomique doit implémenter `RateLimitStore` avant
-  ouverture au public.
 
 ## Avant la vague 2
 
-Les migrations doivent encore être appliquées à une vraie base locale avec
-`db:reset` et `db:lint`. Cette validation a été différée parce que le disque
-système manque actuellement d’espace pour les images Docker.
-
-Il faut également créer les projets Supabase/Cloudinary de développement,
-choisir le fournisseur SMS et CAPTCHA, configurer le stockage de rate limiting,
-et traiter les alertes transitives signalées par `npm audit` dès qu’une version
-stable corrigée de Next.js est disponible.
+Il reste à choisir et configurer le fournisseur SMS, le CAPTCHA et Cloudinary,
+à créer les routes protégées de l’authentification/onboarding, puis à valider la
+CSP en mode bloquant avec les services d’observabilité retenus. Les alertes
+transitives de `npm audit` dans les dépendances internes de Next.js doivent être
+réévaluées dès qu’une version stable corrigée est publiée.

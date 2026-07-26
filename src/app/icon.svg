@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Leco</title>
+  <rect width="512" height="512" rx="120" fill="#ee8b08" />
+  <path
+    d="M144 124v186c0 55 31 86 86 86h146"
+    fill="none"
+    stroke="#211d1a"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="60"
+  />
+  <path
+    d="M372 124 250 332"
+    fill="none"
+    stroke="#211d1a"
+    stroke-linecap="round"
+    stroke-width="60"
+  />
+  <circle
+    cx="250"
+    cy="332"
+    r="22"
+    fill="#ee8b08"
+    stroke="#211d1a"
+    stroke-width="22"
+  />
+</svg>

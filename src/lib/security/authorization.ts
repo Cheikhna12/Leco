@@ -6,12 +6,15 @@
  * other client-controlled values.
  */
 export type AssuranceLevel = "aal1" | "aal2";
+export type ModerationPermission =
+  "reports:read" | "reports:write" | "moderation:read";
 
 export interface SessionIdentity {
   userId: string;
   role: "user" | "moderator" | "admin";
   aal: AssuranceLevel;
   isSuspended: boolean;
+  permissions?: readonly ModerationPermission[];
 }
 
 export interface MatchAuthorizationContext {
@@ -26,6 +29,7 @@ export type AuthorizationErrorCode =
   | "ACCOUNT_SUSPENDED"
   | "FORBIDDEN"
   | "ADMIN_MFA_REQUIRED"
+  | "MODERATOR_MFA_REQUIRED"
   | "MATCH_UNAVAILABLE";
 
 export class AuthorizationError extends Error {
@@ -91,6 +95,27 @@ export function requireAdminMfa(
     throw new AuthorizationError(
       "ADMIN_MFA_REQUIRED",
       "Un accès administrateur avec MFA est requis.",
+    );
+  }
+
+  return authenticatedIdentity;
+}
+
+export function requireModerationPermission(
+  identity: SessionIdentity | null | undefined,
+  permission: ModerationPermission,
+): SessionIdentity {
+  const authenticatedIdentity = requireAuthenticated(identity);
+  const hasMfa = authenticatedIdentity.aal === "aal2";
+  const isAdmin = authenticatedIdentity.role === "admin";
+  const isScopedModerator =
+    authenticatedIdentity.role === "moderator" &&
+    authenticatedIdentity.permissions?.includes(permission);
+
+  if (!hasMfa || (!isAdmin && !isScopedModerator)) {
+    throw new AuthorizationError(
+      "MODERATOR_MFA_REQUIRED",
+      "Un accès de modération avec MFA est requis.",
     );
   }
 

@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+coverage
+playwright-report
+test-results
+artifacts
+
+# Installed/generated design tooling is versioned as received.
+.codex
+.hallmark
+design-system
