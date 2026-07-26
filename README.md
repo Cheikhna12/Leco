@@ -1,4 +1,4 @@
-# heyema
+# Leco
 
 Application web mobile-first de découverte sociale spontanée et sécurisée à
 Abidjan.
