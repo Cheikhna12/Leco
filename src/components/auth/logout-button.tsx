@@ -15,6 +15,7 @@ export function LogoutButton() {
       onClick={async () => {
         setPending(true);
         await fetch("/api/auth/logout", { method: "POST" });
+        window.dispatchEvent(new Event("leco:session-ended"));
         router.replace("/connexion");
         router.refresh();
       }}

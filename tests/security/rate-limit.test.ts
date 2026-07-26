@@ -74,6 +74,7 @@ describe("rate limit primitives", () => {
         "otpRequest",
         "otpVerification",
         "photoUpload",
+        "presenceChange",
         "report",
       ].sort(),
     );

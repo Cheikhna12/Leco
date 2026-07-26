@@ -16,10 +16,10 @@ La vague 1 fournit :
 - helpers de validation, autorisation, headers et redaction ;
 - interface mobile-first utilisant uniquement des données fictives signalées.
 
-La vague 2 ajoute désormais le socle d’authentification : demande et vérification
-OTP, sessions SSR par cookies, renouvellement, déconnexion et redirections selon
-l’état du profil. L’onboarding et la géolocalisation produit restent à intégrer
-sur ce contrat de session.
+La vague 2 ajoute désormais le socle d’authentification et de présence :
+demande et vérification OTP, sessions SSR par cookies, consentement de
+géolocalisation, disponibilité temporaire et heartbeat. L’onboarding reste à
+intégrer sur le même contrat de session.
 
 ## Prérequis
 
@@ -105,6 +105,22 @@ Le contrat partagé se trouve dans
 utiliser `SessionReader` ou `getServerSession()` depuis
 `src/lib/supabase/session.ts`, et ne jamais décoder directement les cookies ou
 les JWT.
+
+## Géolocalisation et présence
+
+- `/presence` explique l’usage de la position avant tout appel à l’API du
+  navigateur et gère refus, blocage, timeout, indisponibilité et précision
+  insuffisante ;
+- `POST /api/location` valide une position récente, applique le rate limiting et
+  appelle `update_my_location` sans jamais retourner les coordonnées ;
+- `GET`, `POST` et `DELETE /api/presence` lisent, activent et désactivent la
+  présence de l’utilisateur courant ;
+- `POST /api/presence/heartbeat` maintient uniquement une présence active,
+  toutes les 50 secondes lorsque l’onglet est visible ;
+- le heartbeat s’arrête à la déconnexion, à la désactivation et à l’expiration.
+  Cinq minutes sans heartbeat rendent la présence invisible côté base ;
+- les coordonnées exactes restent absentes des réponses, de l’interface et des
+  logs.
 
 ## Validation de la base
 
@@ -200,7 +216,9 @@ supabase/
 ├── migrations/
 │   ├── 0001_initial_schema.sql
 │   ├── 0002_rls_policies.sql
-│   └── 0003_wave1_security_hardening.sql
+│   ├── 0003_wave1_security_hardening.sql
+│   ├── 0004_auth_session_context.sql
+│   └── 0006_wave2_location_presence.sql
 ├── tests/
 │   ├── wave1_rls_and_rpc.sql
 │   └── wave1_concurrency.sql

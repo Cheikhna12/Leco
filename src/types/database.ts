@@ -741,6 +741,14 @@ export type Database = {
           profile_id: string;
         }[];
       };
+      get_my_presence: {
+        Args: never;
+        Returns: {
+          availability_status: Database["public"]["Enums"]["availability_status"];
+          available_until: string | null;
+          mood: Database["public"]["Enums"]["mood"] | null;
+        }[];
+      };
       heartbeat_presence: { Args: never; Returns: string };
       list_onboarding_interests: {
         Args: never;
