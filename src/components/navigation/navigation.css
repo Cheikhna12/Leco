@@ -1,0 +1,119 @@
+.app-navigation {
+  background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+  border-top: 1px solid var(--border);
+  bottom: 0;
+  left: 0;
+  padding: var(--space-2) var(--space-2)
+    calc(var(--space-2) + env(safe-area-inset-bottom));
+  position: fixed;
+  right: 0;
+  z-index: 10;
+}
+
+.app-navigation ul {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-navigation__link {
+  align-items: center;
+  border-radius: var(--radius-md);
+  color: var(--foreground-soft);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.68rem;
+  font-weight: 750;
+  gap: 0.18rem;
+  justify-content: center;
+  min-height: 3.5rem;
+  text-decoration: none;
+}
+
+.app-navigation__link svg {
+  height: 1.35rem;
+  width: 1.35rem;
+}
+
+.app-navigation__link[aria-current="page"] {
+  background: var(--coral-50);
+  color: var(--plum-800);
+}
+
+.app-navigation__brand,
+.app-navigation__privacy {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .app-navigation {
+    align-self: start;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    border-top: 0;
+    bottom: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100svh;
+    left: auto;
+    padding: var(--space-8) var(--space-4);
+    position: sticky;
+    right: auto;
+    top: 0;
+  }
+
+  .app-navigation__brand {
+    align-items: center;
+    color: var(--foreground);
+    display: flex;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    gap: var(--space-3);
+    padding: 0 var(--space-3) var(--space-10);
+    text-decoration: none;
+  }
+
+  .app-navigation__brand > span {
+    align-items: center;
+    background: var(--coral-500);
+    border-radius: 50% 50% 50% 0.3rem;
+    color: var(--plum-900);
+    display: flex;
+    font-family: var(--font-body);
+    font-weight: 900;
+    height: 2.35rem;
+    justify-content: center;
+    transform: rotate(-5deg);
+    width: 2.35rem;
+  }
+
+  .app-navigation__brand > strong {
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  .app-navigation ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .app-navigation__link {
+    flex-direction: row;
+    font-size: 0.9rem;
+    gap: var(--space-3);
+    justify-content: flex-start;
+    min-height: 3rem;
+    padding: 0 var(--space-4);
+  }
+
+  .app-navigation__privacy {
+    color: var(--foreground-soft);
+    display: block;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    margin: auto var(--space-3) 0;
+  }
+}
