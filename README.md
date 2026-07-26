@@ -16,8 +16,10 @@ La vague 1 fournit :
 - helpers de validation, autorisation, headers et redaction ;
 - interface mobile-first utilisant uniquement des données fictives signalées.
 
-L’authentification, l’onboarding et la géolocalisation produit restent le
-périmètre de la vague 2.
+La vague 2 ajoute désormais le socle d’authentification : demande et vérification
+OTP, sessions SSR par cookies, renouvellement, déconnexion et redirections selon
+l’état du profil. L’onboarding et la géolocalisation produit restent à intégrer
+sur ce contrat de session.
 
 ## Prérequis
 
@@ -64,10 +66,45 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clé publique locale>
 SUPABASE_SERVICE_ROLE_KEY=<clé service locale, serveur uniquement>
 SUPABASE_DB_URL=<URL PostgreSQL locale>
 RATE_LIMIT_HMAC_SECRET=<secret local aléatoire d’au moins 32 caractères>
+SMS_PROVIDER=test
+DEVELOPMENT_OTP_CODE=<code local de six chiffres, jamais en production>
+CAPTCHA_PROVIDER=test
+NEXT_PUBLIC_CAPTCHA_PROVIDER=test
+NEXT_PUBLIC_CAPTCHA_SITE_KEY=<vide pour le fournisseur test>
+CAPTCHA_SECRET_KEY=<vide pour le fournisseur test>
 ```
 
 Ne jamais préfixer une clé service ou un secret par `NEXT_PUBLIC_`. Ne jamais
 committer `.env.local`, un OTP, un JWT, une clé Cloudinary ou des coordonnées.
+
+`SMS_PROVIDER=test` utilise `DevelopmentOtpProvider`. Il crée une identité
+Supabase locale et établit une vraie session SSR, mais ne transmet aucun SMS. Le
+code défini dans `DEVELOPMENT_OTP_CODE` doit être fourni localement à l’équipe,
+jamais écrit dans les logs ou versionné. Le fournisseur lève une erreur au
+démarrage s’il est sélectionné avec `NODE_ENV=production`.
+
+Pour un environnement connecté, utiliser `SMS_PROVIDER=supabase` et configurer
+le fournisseur SMS dans Supabase. Le CAPTCHA prend en charge `turnstile` et
+`hcaptcha`; les variables serveur et `NEXT_PUBLIC_CAPTCHA_*` doivent désigner le
+même fournisseur.
+
+## Authentification et contrat de session
+
+- `/connexion` normalise les mobiles ivoiriens en `+225`, recueille le
+  consentement et demande un OTP avec un message anti-énumération ;
+- `/verification-otp` accepte six chiffres, le collage et la navigation clavier,
+  puis crée la session Supabase dans des cookies SSR ;
+- `/api/auth/session`, `/api/auth/refresh` et `/api/auth/logout` exposent les
+  opérations minimales de session sans retourner de JWT ;
+- les routes `/onboarding`, `/profil` et `/presence` sont protégées par le proxy ;
+- un profil incomplet va vers `/onboarding`, un compte suspendu vers
+  `/acces-restreint`, et un profil complet vers l’accueil.
+
+Le contrat partagé se trouve dans
+`src/features/auth/session-contract.ts`. Les autres fonctionnalités doivent
+utiliser `SessionReader` ou `getServerSession()` depuis
+`src/lib/supabase/session.ts`, et ne jamais décoder directement les cookies ou
+les JWT.
 
 ## Validation de la base
 
@@ -129,7 +166,17 @@ npm run build
 - Avertissements `extensions.st_findextent` ou `populate_geometry_columns` :
   relancer le lint strict `--schema public,private`; ne pas modifier PostGIS.
 - Login téléphone désactivé : configurer un fournisseur SMS local avant les
-  tests OTP de la vague 2.
+  tests OTP, ou utiliser `SMS_PROVIDER=test` avec les variables locales
+  documentées ci-dessus.
+- Le conteneur Vector peut redémarrer lorsque Docker Desktop ne fournit pas son
+  endpoint interne. Ce défaut d’agrégation des logs locaux ne bloque pas
+  PostgreSQL, PostGIS, Auth, API, Studio ou Realtime, et ne bloque donc pas la
+  vague 2. Ne jamais exposer un daemon Docker non authentifié sur le port `2375`
+  pour le contourner.
+- Ne jamais exécuter `npm audit fix --force` : la correction actuellement
+  proposée rétrograde Next.js vers la version 9 et casserait l’application.
+  Surveiller une mise à jour compatible et faire accepter le risque avant la
+  production.
 - Navigateur Playwright absent : définir `PLAYWRIGHT_CHANNEL=msedge` sur
   Windows ou exécuter `npx playwright install chromium` si l’espace disque le
   permet.
