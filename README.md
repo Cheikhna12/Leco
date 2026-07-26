@@ -239,3 +239,48 @@ Il reste à choisir et configurer le fournisseur SMS, le CAPTCHA et Cloudinary,
 CSP en mode bloquant avec les services d’observabilité retenus. Les alertes
 transitives de `npm audit` dans les dépendances internes de Next.js doivent être
 réévaluées dès qu’une version stable corrigée est publiée.
+
+## Vague 2 — onboarding et profil
+
+Le parcours authentifié `/onboarding` sauvegarde progressivement quatre étapes :
+informations principales, photos, centres d’intérêt et consentement de
+géolocalisation. Un parcours interrompu reprend depuis l’étape conservée en base.
+La page `/profil` réutilise le même contrat pour les modifications autorisées.
+
+Les mutations de profil passent exclusivement par les RPC de la migration
+`0005_wave2_onboarding_profile.sql`. Elles utilisent `auth.uid()`, un
+`search_path` vide et des droits d’exécution limités à `authenticated`. La date
+de naissance est verrouillée après sa première validation et devra passer par
+une procédure de vérification distincte pour être corrigée.
+
+Les photos sont envoyées à `POST /api/photos`. Le serveur :
+
+- limite les fichiers à 8 Mo ;
+- détecte JPEG, PNG ou WebP depuis leur signature binaire ;
+- refuse HEIC tant qu’aucun convertisseur serveur n’est configuré ;
+- réalise un upload Cloudinary signé avec une transformation d’orientation,
+  recadrage et optimisation qui ne conserve pas les métadonnées EXIF ;
+- n’expose jamais `CLOUDINARY_API_SECRET` au navigateur.
+
+Cloudinary doit être configuré uniquement dans `.env.local` :
+
+```text
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Le test Playwright complet est opt-in afin de ne pas consommer Cloudinary et
+l’OTP à chaque validation :
+
+```powershell
+$env:E2E_ONBOARDING_LIVE="true"
+$env:E2E_DEVELOPMENT_OTP_CODE="000000"
+$env:E2E_PROFILE_PHOTO_ONE="D:\fixtures\portrait-1.jpg"
+$env:E2E_PROFILE_PHOTO_TWO="D:\fixtures\portrait-2.jpg"
+npx playwright test tests/e2e/onboarding/onboarding-live.spec.ts
+```
+
+Le consentement de localisation est demandé seulement au dernier écran, après
+une explication. La capture et l’enregistrement sécurisé de la position restent
+du ressort du module présence/localisation de la vague 2.
