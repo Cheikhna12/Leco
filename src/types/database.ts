@@ -609,6 +609,19 @@ export type Database = {
         };
         Returns: string;
       };
+      consume_rate_limit: {
+        Args: {
+          p_cost?: number;
+          p_key: string;
+          p_limit: number;
+          p_window_seconds: number;
+        };
+        Returns: {
+          allowed: boolean;
+          remaining: number;
+          reset_at: string;
+        }[];
+      };
       deactivate_presence: {
         Args: { p_hidden?: boolean };
         Returns: undefined;
@@ -635,6 +648,14 @@ export type Database = {
           mood: Database["public"]["Enums"]["mood"];
           primary_photo_url: string | null;
           profile_id: string;
+        }[];
+      };
+      get_my_session_context: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          user_id: string;
+          account_status: Database["public"]["Enums"]["account_status"];
+          is_profile_complete: boolean;
         }[];
       };
       heartbeat_presence: {
