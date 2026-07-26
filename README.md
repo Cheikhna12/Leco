@@ -16,10 +16,9 @@ La vague 1 fournit :
 - helpers de validation, autorisation, headers et redaction ;
 - interface mobile-first utilisant uniquement des données fictives signalées.
 
-La vague 2 ajoute désormais le socle d’authentification et de présence :
-demande et vérification OTP, sessions SSR par cookies, consentement de
-géolocalisation, disponibilité temporaire et heartbeat. L’onboarding reste à
-intégrer sur le même contrat de session.
+La vague 2 ajoute l’authentification OTP, les sessions SSR, l’onboarding
+transactionnel avec photos et intérêts, la géolocalisation consentie, la
+disponibilité temporaire et le heartbeat sur un même contrat de session.
 
 ## Prérequis
 
@@ -155,6 +154,7 @@ npm run db:lint         Lint de tous les schémas
 npm run db:lint:strict  Lint bloquant de public et private
 npm run db:stop         Arrêt Supabase
 npm run validate:wave1  Validation locale complète
+npm run validate:wave2  Validation complète des vagues 1 et 2
 ```
 
 Les commandes demandées peuvent également être lancées directement :
@@ -218,10 +218,14 @@ supabase/
 │   ├── 0002_rls_policies.sql
 │   ├── 0003_wave1_security_hardening.sql
 │   ├── 0004_auth_session_context.sql
+│   ├── 0005_wave2_onboarding_profile.sql
 │   └── 0006_wave2_location_presence.sql
 ├── tests/
 │   ├── wave1_rls_and_rpc.sql
-│   └── wave1_concurrency.sql
+│   ├── wave1_concurrency.sql
+│   ├── wave2_auth_session.sql
+│   ├── wave2_onboarding_profile.sql
+│   └── wave2_location_presence.sql
 ├── config.toml
 └── seed.sql
 
@@ -250,13 +254,13 @@ complet de la vague est dans `docs/wave-1-summary.md`.
 - La CSP est actuellement en mode `Report-Only` jusqu’à la propagation des
   nonces et la validation Sentry/PostHog.
 
-## Avant la vague 2
+## Avant le staging et la vague 3
 
 Il reste à choisir et configurer le fournisseur SMS, le CAPTCHA et Cloudinary,
-à créer les routes protégées de l’authentification/onboarding, puis à valider la
-CSP en mode bloquant avec les services d’observabilité retenus. Les alertes
-transitives de `npm audit` dans les dépendances internes de Next.js doivent être
-réévaluées dès qu’une version stable corrigée est publiée.
+à exécuter le parcours live opt-in avec ces services, puis à valider la CSP en
+mode bloquant avec les services d’observabilité retenus. Les alertes transitives
+de `npm audit` dans les dépendances internes de Next.js doivent être réévaluées
+dès qu’une version stable corrigée est publiée.
 
 ## Vague 2 — onboarding et profil
 
@@ -293,11 +297,18 @@ l’OTP à chaque validation :
 
 ```powershell
 $env:E2E_ONBOARDING_LIVE="true"
+$env:E2E_AUTH_LIVE="true"
 $env:E2E_DEVELOPMENT_OTP_CODE="000000"
 $env:E2E_PROFILE_PHOTO_ONE="D:\fixtures\portrait-1.jpg"
 $env:E2E_PROFILE_PHOTO_TWO="D:\fixtures\portrait-2.jpg"
 npx playwright test tests/e2e/onboarding/onboarding-live.spec.ts
 ```
+
+Ces scénarios sont volontairement ignorés lorsque les variables opt-in ou les
+identifiants Cloudinary sont absents. Les tests Playwright par défaut utilisent
+uniquement des mocks aux frontières réseau pour les erreurs OTP ; ils ne
+simulent ni Supabase, ni Cloudinary à l’intérieur du code métier. La validation
+live doit être exécutée avant staging avec des comptes et médias de test.
 
 Le consentement de localisation est demandé seulement au dernier écran, après
 une explication. La capture et l’enregistrement sécurisé de la position restent

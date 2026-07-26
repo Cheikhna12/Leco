@@ -54,8 +54,10 @@ export async function readVerifiedSession(
     userId: user.id,
     role: toRole(user.app_metadata.role),
     assuranceLevel: toAssuranceLevel(claims?.aal),
-    accountState:
-      profile?.account_status === "suspended" ? "suspended" : "active",
+    // Every non-active database state is restricted. This fail-closed mapping
+    // prevents deactivated and pending-deletion accounts from being treated as
+    // active by the intentionally binary Wave 2 session contract.
+    accountState: profile?.account_status === "active" ? "active" : "suspended",
     profileState: profile?.is_profile_complete ? "complete" : "incomplete",
     expiresAt: jwt?.expires_at ? new Date(jwt.expires_at * 1000) : null,
   };

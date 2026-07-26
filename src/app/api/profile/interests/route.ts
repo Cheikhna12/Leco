@@ -22,10 +22,10 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    await requireProfileSession();
     const { interestIds } = await readJson(request, interestsSelectionSchema);
+    await requireProfileSession();
     const client = await createClient();
     await replaceInterests(client, interestIds);
     return profileJson({ saved: true });
@@ -33,3 +33,4 @@ export async function PUT(request: Request) {
     return toProfileErrorResponse(error);
   }
 }
+import type { NextRequest } from "next/server";

@@ -64,4 +64,47 @@ describe("lecture de session Supabase", () => {
 
     await expect(readVerifiedSession(client as never)).resolves.toBeNull();
   });
+
+  it.each(["deactivated", "pending_deletion", "suspended", undefined])(
+    "restreint par défaut un profil au statut %s",
+    async (accountStatus) => {
+      const { readVerifiedSession } = await import("@/lib/supabase/session");
+      const client = {
+        auth: {
+          getUser: vi.fn().mockResolvedValue({
+            data: {
+              user: { id: "restricted-user", app_metadata: {} },
+            },
+            error: null,
+          }),
+          getClaims: vi.fn().mockResolvedValue({
+            data: { claims: { aal: "aal1" } },
+            error: null,
+          }),
+          getSession: vi.fn().mockResolvedValue({
+            data: { session: { expires_at: 2_000_000_000 } },
+            error: null,
+          }),
+        },
+        rpc: vi.fn().mockResolvedValue({
+          data:
+            accountStatus === undefined
+              ? []
+              : [
+                  {
+                    account_status: accountStatus,
+                    is_profile_complete: true,
+                  },
+                ],
+          error: null,
+        }),
+      };
+
+      await expect(readVerifiedSession(client as never)).resolves.toMatchObject(
+        {
+          accountState: "suspended",
+        },
+      );
+    },
+  );
 });

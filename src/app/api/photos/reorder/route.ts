@@ -8,13 +8,14 @@ import {
 } from "@/features/profiles/server/request";
 import { createClient } from "@/lib/supabase/server";
 
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
   try {
-    await requireProfileSession();
     const { photoIds } = await readJson(request, photoOrderSchema);
+    await requireProfileSession();
     await reorderPhotos(await createClient(), photoIds);
     return profileJson({ reordered: true });
   } catch (error) {
     return toProfileErrorResponse(error);
   }
 }
+import type { NextRequest } from "next/server";

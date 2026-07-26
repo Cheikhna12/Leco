@@ -60,6 +60,8 @@ begin
     )
     and presence.availability_status = 'available'
     and presence.available_until > statement_timestamp()
+    and presence.last_heartbeat_at >
+      statement_timestamp() - interval '5 minutes'
   returning presence.available_until into v_available_until;
 
   if v_available_until is null then

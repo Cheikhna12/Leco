@@ -41,4 +41,20 @@ test.describe("session OTP locale réelle", () => {
     await page.goto("/presence");
     await expect(page).toHaveURL(/\/connexion/);
   });
+
+  test("refuse un OTP incorrect sans exposer le numéro complet", async ({
+    page,
+  }) => {
+    await page.goto("/connexion");
+    await page.getByLabel("Numéro mobile").fill("07 00 00 12 36");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: /recevoir mon code/i }).click();
+    await page.getByLabel("Chiffre 1 sur 6").fill("000000");
+    await page.getByRole("button", { name: /confirmer le code/i }).click();
+
+    await expect(page.locator("#otp-status")).toContainText(
+      /pas valide|expiré/i,
+    );
+    await expect(page.locator("body")).not.toContainText("+2250700001236");
+  });
 });

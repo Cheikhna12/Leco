@@ -1,6 +1,9 @@
+import type { NextRequest } from "next/server";
+
 import { photoIdSchema } from "@/features/profiles/profile-schema";
 import { removePhoto } from "@/features/profiles/server/profile-repository";
 import {
+  assertProfileMutationOrigin,
   profileJson,
   requireProfileSession,
   toProfileErrorResponse,
@@ -9,10 +12,11 @@ import { deleteProfilePhoto } from "@/lib/cloudinary/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function DELETE(
-  _request: Request,
+  request: NextRequest,
   context: { params: Promise<{ photoId: string }> },
 ) {
   try {
+    assertProfileMutationOrigin(request);
     await requireProfileSession();
     const { photoId } = await context.params;
     const validatedId = photoIdSchema.parse(photoId);

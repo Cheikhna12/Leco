@@ -1,10 +1,24 @@
 import "server-only";
 
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError, type ZodType } from "zod";
 
 import type { AuthenticatedSession } from "@/features/auth/session-contract";
+import {
+  assertSameOrigin,
+  RequestOriginError,
+} from "@/features/auth/server/request";
+import {
+  assertActualRequestSize,
+  assertDeclaredRequestSize,
+  assertJsonContentType,
+  RequestTooLargeError,
+  RequestValidationError,
+} from "@/lib/security/validation";
 import { getServerSession } from "@/lib/supabase/session";
+
+const MAX_PROFILE_JSON_BYTES = 16 * 1024;
 
 export function profileJson(
   body: Readonly<Record<string, unknown>>,
@@ -36,17 +50,61 @@ export async function requireProfileSession(): Promise<AuthenticatedSession> {
 }
 
 export async function readJson<T>(
-  request: Request,
+  request: NextRequest,
   schema: ZodType<T>,
 ): Promise<T> {
-  if (!request.headers.get("content-type")?.startsWith("application/json")) {
+  assertSameOrigin(request);
+  assertJsonContentType(request.headers.get("content-type"));
+  assertDeclaredRequestSize(
+    request.headers.get("content-length"),
+    MAX_PROFILE_JSON_BYTES,
+  );
+
+  const rawBody = await request.text();
+  assertActualRequestSize(rawBody, MAX_PROFILE_JSON_BYTES);
+
+  let body: unknown;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    body = null;
+  }
+
+  return schema.parse(body);
+}
+
+export function assertProfileMutationOrigin(request: NextRequest): void {
+  assertSameOrigin(request);
+}
+
+export function assertProfileMultipartRequest(
+  request: NextRequest,
+  maxBytes: number,
+): void {
+  assertSameOrigin(request);
+
+  const mediaType = request.headers
+    .get("content-type")
+    ?.split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+  if (mediaType !== "multipart/form-data") {
     throw new ProfileRequestError(
       "INVALID_REQUEST",
-      "Une requête JSON est attendue.",
+      "Un formulaire multipart est attendu.",
       400,
     );
   }
-  return schema.parse(await request.json());
+
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength === null) {
+    throw new ProfileRequestError(
+      "LENGTH_REQUIRED",
+      "La taille de la requête est requise.",
+      411,
+    );
+  }
+  assertDeclaredRequestSize(declaredLength, maxBytes);
 }
 
 export class ProfileRequestError extends Error {
@@ -61,6 +119,27 @@ export class ProfileRequestError extends Error {
 }
 
 export function toProfileErrorResponse(error: unknown) {
+  if (
+    error instanceof RequestOriginError ||
+    error instanceof RequestValidationError ||
+    error instanceof RequestTooLargeError
+  ) {
+    return profileJson(
+      {
+        error: {
+          code:
+            error instanceof RequestTooLargeError
+              ? "REQUEST_TOO_LARGE"
+              : "INVALID_REQUEST",
+          message:
+            error instanceof RequestTooLargeError
+              ? "La requête dépasse la taille autorisée."
+              : "Les informations envoyées ne sont pas valides.",
+        },
+      },
+      { status: error.status },
+    );
+  }
   if (error instanceof ProfileRequestError) {
     return profileJson(
       { error: { code: error.code, message: error.message } },

@@ -1,8 +1,11 @@
+import type { NextRequest } from "next/server";
+
 import {
   addPhoto,
   getOnboardingState,
 } from "@/features/profiles/server/profile-repository";
 import {
+  assertProfileMultipartRequest,
   ProfileRequestError,
   profileJson,
   requireProfileSession,
@@ -20,18 +23,11 @@ import { createClient } from "@/lib/supabase/server";
 
 const MAX_MULTIPART_BYTES = MAX_PROFILE_PHOTO_BYTES + 256 * 1024;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   let uploadedPublicId: string | null = null;
   try {
+    assertProfileMultipartRequest(request, MAX_MULTIPART_BYTES);
     const session = await requireProfileSession();
-    const declaredLength = Number(request.headers.get("content-length") ?? "0");
-    if (declaredLength > MAX_MULTIPART_BYTES) {
-      throw new ProfileRequestError(
-        "PHOTO_TOO_LARGE",
-        "La photo dépasse la limite de 8 Mo.",
-        413,
-      );
-    }
     const formData = await request.formData();
     const file = formData.get("photo");
     if (!(file instanceof File)) {
@@ -39,6 +35,15 @@ export async function POST(request: Request) {
         "PHOTO_REQUIRED",
         "Choisis une photo.",
         400,
+      );
+    }
+    if (file.size === 0 || file.size > MAX_PROFILE_PHOTO_BYTES) {
+      throw new ProfileRequestError(
+        file.size === 0 ? "PHOTO_REQUIRED" : "PHOTO_TOO_LARGE",
+        file.size === 0
+          ? "Choisis une photo."
+          : "La photo dépasse la limite de 8 Mo.",
+        file.size === 0 ? 400 : 413,
       );
     }
 

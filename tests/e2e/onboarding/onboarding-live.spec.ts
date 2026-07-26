@@ -42,8 +42,40 @@ test.describe("onboarding local réel", () => {
     await page.getByRole("button", { name: "Cinéma" }).click();
     await page.getByRole("button", { name: /continuer/i }).click();
 
+    await page.context().setGeolocation({
+      accuracy: 20,
+      latitude: 5.3364,
+      longitude: -4.0267,
+    });
     await page.context().grantPermissions(["geolocation"]);
     await page.getByRole("button", { name: /autoriser ma position/i }).click();
     await expect(page.getByText("Autorisation accordée")).toBeVisible();
+    await page.getByRole("button", { name: "Terminer" }).click();
+    await expect(page).toHaveURL(/\/presence/);
+
+    await page.getByRole("button", { name: /je veux être visible/i }).click();
+    await page
+      .getByRole("button", { name: /autoriser pour continuer/i })
+      .click();
+    await page.getByRole("button", { name: /je suis dispo/i }).click();
+    await expect(page.getByText("Signal actif")).toBeVisible();
+
+    const heartbeat = await page.evaluate(async () => {
+      const response = await fetch("/api/presence/heartbeat", {
+        method: "POST",
+      });
+      return { body: await response.text(), ok: response.ok };
+    });
+    expect(heartbeat.ok).toBe(true);
+    expect(heartbeat.body).not.toMatch(/latitude|longitude|5\.3364|-4\.0267/i);
+
+    await page.getByRole("button", { name: "Je suis off" }).last().click();
+    await expect(page.getByText("Signal éteint")).toBeVisible();
+
+    const logout = await page.evaluate(async () => {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      return response.ok;
+    });
+    expect(logout).toBe(true);
   });
 });

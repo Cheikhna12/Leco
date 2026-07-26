@@ -22,10 +22,10 @@ export async function GET() {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
-    await requireProfileSession();
     const input = await readJson(request, profileDraftSchema);
+    await requireProfileSession();
     const client = await createClient();
     await saveProfileDraft(client, input);
     return profileJson({ profile: await getOnboardingState(client) });
@@ -33,3 +33,4 @@ export async function PATCH(request: Request) {
     return toProfileErrorResponse(error);
   }
 }
+import type { NextRequest } from "next/server";

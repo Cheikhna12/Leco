@@ -23,10 +23,22 @@ export function getRemoteAddress(request: NextRequest): string {
 export function assertSameOrigin(request: NextRequest): void {
   const origin = request.headers.get("origin");
   const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL;
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = forwardedHost || request.headers.get("host");
+  const forwardedProtocol = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim();
+  const requestProtocol =
+    forwardedProtocol || request.nextUrl.protocol.replace(/:$/, "");
+  const headerOrigin =
+    host && (requestProtocol === "http" || requestProtocol === "https")
+      ? `${requestProtocol}://${host}`
+      : undefined;
   const candidates =
     process.env.NODE_ENV === "production"
       ? [configuredOrigin]
-      : [configuredOrigin, request.nextUrl.origin];
+      : [configuredOrigin, request.nextUrl.origin, headerOrigin];
   const allowedOrigins = new Set(
     candidates.filter((value): value is string => Boolean(value)),
   );
