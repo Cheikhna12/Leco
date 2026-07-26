@@ -1,0 +1,22 @@
+{
+  "name": "heyema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Découverte sociale spontanée et sécurisée à Abidjan.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run typecheck && npm run lint && npm run test"
+  }
+}
