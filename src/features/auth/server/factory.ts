@@ -26,8 +26,9 @@ function requiredServerValue(name: string): string {
 
 export async function createOtpProvider(): Promise<OtpProvider> {
   const sessionClient = await createClient();
-  const smsProvider = process.env.SMS_PROVIDER || "supabase";
   const production = process.env.NODE_ENV === "production";
+  const smsProvider =
+    process.env.SMS_PROVIDER || (production ? "supabase" : "test");
 
   if (smsProvider === "test") {
     if (production) {
@@ -37,7 +38,7 @@ export async function createOtpProvider(): Promise<OtpProvider> {
     return new DevelopmentOtpProvider({
       adminClient: createAdminClient(),
       sessionClient,
-      code: requiredServerValue("DEVELOPMENT_OTP_CODE"),
+      code: process.env.DEVELOPMENT_OTP_CODE || "123456",
       secret: requiredServerValue("RATE_LIMIT_HMAC_SECRET"),
       production,
     });
@@ -60,7 +61,9 @@ export async function createAuthenticationService() {
     ),
     rateLimitSecret: secret,
     captchaVerifier: new EnvironmentCaptchaVerifier({
-      provider: process.env.CAPTCHA_PROVIDER,
+      provider:
+        process.env.CAPTCHA_PROVIDER ||
+        (process.env.NODE_ENV === "production" ? undefined : "disabled"),
       secret: process.env.CAPTCHA_SECRET_KEY,
       production: process.env.NODE_ENV === "production",
     }),

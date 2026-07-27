@@ -1,6 +1,7 @@
 import "server-only";
 
-export type CaptchaProviderName = "turnstile" | "hcaptcha" | "test";
+export type CaptchaProviderName =
+  "turnstile" | "hcaptcha" | "test" | "disabled";
 
 export interface CaptchaVerifier {
   verify(token: string | undefined, remoteAddress?: string): Promise<boolean>;
@@ -13,7 +14,7 @@ type CaptchaVerifierOptions = {
 };
 
 const CAPTCHA_ENDPOINTS: Record<
-  Exclude<CaptchaProviderName, "test">,
+  Exclude<CaptchaProviderName, "test" | "disabled">,
   string
 > = {
   turnstile: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -22,8 +23,13 @@ const CAPTCHA_ENDPOINTS: Record<
 
 export class EnvironmentCaptchaVerifier implements CaptchaVerifier {
   constructor(private readonly options: CaptchaVerifierOptions) {
-    if (options.production && options.provider === "test") {
-      throw new Error("Le CAPTCHA de test est interdit en production.");
+    if (
+      options.production &&
+      (options.provider === "test" || options.provider === "disabled")
+    ) {
+      throw new Error(
+        "Le CAPTCHA de test ou désactivé est interdit en production.",
+      );
     }
   }
 
@@ -31,6 +37,10 @@ export class EnvironmentCaptchaVerifier implements CaptchaVerifier {
     token: string | undefined,
     remoteAddress?: string,
   ): Promise<boolean> {
+    if (this.options.provider === "disabled") {
+      return !this.options.production;
+    }
+
     if (!token) {
       return false;
     }

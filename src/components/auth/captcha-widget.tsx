@@ -26,6 +26,10 @@ export function CaptchaWidget({ onToken }: CaptchaWidgetProps) {
     };
   }, [callbackName, onToken]);
 
+  if (process.env.NODE_ENV !== "production" && provider === "disabled") {
+    return null;
+  }
+
   if (process.env.NODE_ENV !== "production" && provider === "test") {
     return (
       <button

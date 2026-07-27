@@ -14,7 +14,9 @@ const serverEnvSchema = z.object({
     .regex(/^\d{6}$/)
     .optional(),
   RATE_LIMIT_HMAC_SECRET: z.string().min(32).optional(),
-  CAPTCHA_PROVIDER: z.enum(["turnstile", "hcaptcha", "test"]).optional(),
+  CAPTCHA_PROVIDER: z
+    .enum(["turnstile", "hcaptcha", "test", "disabled"])
+    .optional(),
   CAPTCHA_SECRET_KEY: z.string().min(1).optional(),
 });
 

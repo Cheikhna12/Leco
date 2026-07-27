@@ -141,6 +141,28 @@ describe("DevelopmentOtpProvider", () => {
   });
 });
 
+describe("EnvironmentCaptchaVerifier", () => {
+  it("désactive le CAPTCHA uniquement hors production", async () => {
+    const { EnvironmentCaptchaVerifier } =
+      await import("@/features/auth/captcha");
+
+    await expect(
+      new EnvironmentCaptchaVerifier({
+        provider: "disabled",
+        production: false,
+      }).verify(undefined),
+    ).resolves.toBe(true);
+
+    expect(
+      () =>
+        new EnvironmentCaptchaVerifier({
+          provider: "disabled",
+          production: true,
+        }),
+    ).toThrow(/interdit en production/i);
+  });
+});
+
 describe("SupabaseOtpProvider", () => {
   it("demande puis vérifie un OTP valide", async () => {
     const { SupabaseOtpProvider } =

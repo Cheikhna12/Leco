@@ -6,7 +6,7 @@ const publicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_CAPTCHA_PROVIDER: z
-    .enum(["turnstile", "hcaptcha", "test"])
+    .enum(["turnstile", "hcaptcha", "test", "disabled"])
     .optional(),
   NEXT_PUBLIC_CAPTCHA_SITE_KEY: z.string().min(1).optional(),
 });
