@@ -1,9 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { DiscoveryPreview } from "@/components/discovery/discovery-preview";
-import { AppNavigation } from "@/components/navigation/app-navigation";
 import { Button } from "@/components/ui/button";
+import { LecoMark } from "@/components/ui/leco-mark";
 import { LoadingState, StatePanel } from "@/components/ui/states";
 
 describe("UI foundations", () => {
@@ -32,20 +31,11 @@ describe("UI foundations", () => {
     expect(error).toContain('role="alert"');
   });
 
-  it("labels demo data and exposes approximate distances only", () => {
-    const markup = renderToStaticMarkup(<DiscoveryPreview />);
+  it("renders the custom Leco mark without generic iconography", () => {
+    const markup = renderToStaticMarkup(<LecoMark />);
 
-    expect(markup).toContain("Aperçu UI");
-    expect(markup).toContain("Distance approximative uniquement");
-    expect(markup).toContain("Tout près");
-    expect(markup).not.toMatch(/\b(?:latitude|longitude)\b/i);
-    expect(markup).not.toMatch(/-?\d{1,3}\.\d{3,}/);
-  });
-
-  it("uses the Leco brand in accessible navigation", () => {
-    const markup = renderToStaticMarkup(<AppNavigation />);
-
-    expect(markup).toContain("Accueil Leco");
-    expect(markup).toContain(">Leco<");
+    expect(markup).toContain('viewBox="0 0 64 64"');
+    expect(markup).toContain("leco-mark__route");
+    expect(markup).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u);
   });
 });

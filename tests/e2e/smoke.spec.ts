@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("loads Leco, switches theme and navigates without critical errors", async ({
+test("routes an anonymous visitor to the real authentication flow", async ({
   page,
 }) => {
   const criticalErrors: string[] = [];
@@ -22,60 +22,14 @@ test("loads Leco, switches theme and navigates without critical errors", async (
   await page.goto("/", { waitUntil: "networkidle" });
 
   await expect(page).toHaveTitle(/Leco/);
+  await expect(page).toHaveURL(/\/connexion$/);
   await expect(
-    page.getByRole("heading", { level: 1, name: /Qui est partant/ }),
+    page.getByRole("heading", { level: 1, name: /Autour de toi/ }),
   ).toBeVisible();
-  await expect(page.getByText("Aperçu privé")).toBeVisible();
-  await expect(page.getByText("Aperçu UI · données fictives")).toBeVisible();
-  await page.waitForTimeout(500);
-  expect(criticalErrors).toEqual([]);
-
-  const themeButton = page.getByRole("button", { name: "Changer de thème" });
-  if (await themeButton.isVisible()) {
-    await themeButton.click();
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-theme",
-      /^(dark|light)$/,
-    );
-    const firstTheme = await page.locator("html").getAttribute("data-theme");
-    await themeButton.click();
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-theme",
-      firstTheme === "dark" ? "light" : "dark",
-    );
-  } else {
-    await page.emulateMedia({ colorScheme: "light" });
-    await page.reload({ waitUntil: "networkidle" });
-    const lightBackground = await page
-      .locator("body")
-      .evaluate((element) => getComputedStyle(element).backgroundColor);
-    await page.emulateMedia({ colorScheme: "dark" });
-    await page.reload({ waitUntil: "networkidle" });
-    await page.waitForTimeout(500);
-    const darkBackground = await page
-      .locator("body")
-      .evaluate((element) => getComputedStyle(element).backgroundColor);
-    expect(darkBackground).not.toBe(lightBackground);
-  }
-
-  await page.getByRole("button", { name: /^Messages/ }).click();
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "Des conversations qui comptent.",
-    }),
-  ).toBeVisible();
-  await expect(page.getByText(/données fictives/i)).toBeVisible();
-
-  await page.getByRole("button", { name: /^Ma vibe/ }).click();
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: "Pose ta vibe. Vis ta soirée.",
-    }),
-  ).toBeVisible();
-  await expect(page.getByText(/aperçu interactif local/i)).toBeVisible();
-
+  await expect(page.getByRole("heading", { name: /Ton numéro/ })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText(
+    /données fictives|aperçu local|Awa|Mariam|Yann/i,
+  );
   expect(criticalErrors).toEqual([]);
 });
 
