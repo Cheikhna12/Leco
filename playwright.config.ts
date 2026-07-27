@@ -32,6 +32,7 @@ export default defineConfig({
     command: `npm run dev -- --hostname ${serverUrl.hostname} --port ${serverUrl.port}`,
     env: {
       NEXT_PUBLIC_APP_URL: baseURL,
+      NEXT_DIST_DIR: "test-results/.next",
     },
     reuseExistingServer: false,
     url: baseURL,
