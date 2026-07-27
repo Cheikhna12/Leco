@@ -63,15 +63,20 @@ select extensions.is(
       and specific_name like 'get_my_presence_%'
       and parameter_mode = 'OUT'
   ),
-  array['availability_status', 'mood', 'available_until']::text[],
-  'get_my_presence exposes no coordinates or location metadata'
+  array[
+    'availability_status',
+    'mood',
+    'available_until',
+    'has_valid_location'
+  ]::text[],
+  'get_my_presence exposes only a location-readiness boolean'
 );
 
 select extensions.ok(
   pg_catalog.pg_get_functiondef(
     'public.get_my_presence()'::regprocedure
-  ) !~* 'user_locations',
-  'get_my_presence never reads exact locations'
+  ) !~* 'latitude|longitude|accuracy_m|st_x|st_y|st_asgeojson',
+  'get_my_presence never serializes exact locations'
 );
 
 select extensions.ok(
@@ -196,6 +201,24 @@ values (
   pg_catalog.now() + interval '30 minutes'
 );
 
+insert into public.user_locations (
+  user_id,
+  location,
+  accuracy_m,
+  captured_at,
+  expires_at
+)
+values (
+  '00000000-0000-0000-0000-0000000006a1',
+  extensions.st_setsrid(
+    extensions.st_makepoint(-4.0267, 5.3364),
+    4326
+  )::extensions.geography,
+  20,
+  pg_catalog.now(),
+  pg_catalog.now() + interval '15 minutes'
+);
+
 set local role authenticated;
 select pg_catalog.set_config(
   'request.jwt.claims',
@@ -208,13 +231,14 @@ select extensions.results_eq(
     select
       availability_status::text,
       mood::text,
-      available_until is not null
+      available_until is not null,
+      has_valid_location
     from public.get_my_presence()
   $$,
   $$
-    values ('available'::text, 'discuter'::text, true)
+    values ('available'::text, 'discuter'::text, true, true)
   $$,
-  'an active presence is returned without coordinates'
+  'an active presence returns only location readiness'
 );
 
 select extensions.lives_ok(

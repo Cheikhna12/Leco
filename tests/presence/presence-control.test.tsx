@@ -38,6 +38,7 @@ function setupHooks() {
     pending: false,
     snapshot: {
       availableUntil: null,
+      hasValidLocation: false,
       mood: null,
       status: "OFFLINE",
     },
@@ -45,6 +46,30 @@ function setupHooks() {
 }
 
 describe("PresenceControl", () => {
+  it("réutilise une position encore valide enregistrée pendant l’onboarding", () => {
+    setupHooks();
+    vi.mocked(usePresence).mockReturnValue({
+      activate: vi.fn(),
+      deactivate: vi.fn(),
+      error: null,
+      loading: false,
+      pending: false,
+      snapshot: {
+        availableUntil: null,
+        hasValidLocation: true,
+        mood: null,
+        status: "OFFLINE",
+      },
+    });
+
+    render(<PresenceControl />);
+
+    expect(
+      screen.getByRole("group", { name: /ton mood/i }),
+    ).toBeInTheDocument();
+    expect(requestLocation).not.toHaveBeenCalled();
+  });
+
   it("explique la confidentialité avant de demander la permission", () => {
     setupHooks();
     render(<PresenceControl />);

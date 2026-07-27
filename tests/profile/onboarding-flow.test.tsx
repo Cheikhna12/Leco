@@ -1,13 +1,38 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 import type { OnboardingState } from "@/features/profiles/profile-types";
 
 const replace = vi.fn();
+const geolocation = vi.hoisted(() => ({
+  errorMessage: null as string | null,
+  requestLocation: vi.fn().mockResolvedValue(true),
+  state: "idle" as
+    | "idle"
+    | "checking"
+    | "requesting"
+    | "ready"
+    | "denied"
+    | "blocked"
+    | "unavailable"
+    | "timeout"
+    | "inaccurate"
+    | "unsupported"
+    | "error",
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace, refresh: vi.fn() }),
+}));
+vi.mock("@/hooks/use-geolocation", () => ({
+  useGeolocation: () => ({
+    errorMessage: geolocation.errorMessage,
+    requestLocation: geolocation.requestLocation,
+    reset: vi.fn(),
+    state: geolocation.state,
+  }),
 }));
 
 const profile: OnboardingState = {
@@ -43,6 +68,12 @@ const interests = [
 ];
 
 describe("parcours onboarding", () => {
+  beforeEach(() => {
+    geolocation.errorMessage = null;
+    geolocation.requestLocation.mockClear();
+    geolocation.state = "idle";
+  });
+
   it("reprend le parcours à l’étape sauvegardée", () => {
     render(<OnboardingFlow initialProfile={profile} interests={interests} />);
     expect(
@@ -63,5 +94,43 @@ describe("parcours onboarding", () => {
       "aria-pressed",
       "true",
     );
+  });
+
+  it("enregistre la position côté serveur depuis l’étape de localisation", async () => {
+    const user = userEvent.setup();
+    render(
+      <OnboardingFlow
+        initialProfile={{ ...profile, onboardingStep: 4 }}
+        interests={interests}
+      />,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Autoriser et enregistrer" }),
+    );
+
+    expect(geolocation.requestLocation).toHaveBeenCalledOnce();
+    expect(
+      screen.getByText(/aucun historique de déplacement/i),
+    ).toBeInTheDocument();
+  });
+
+  it("explique une permission bloquée sans masquer la reprise", () => {
+    geolocation.state = "blocked";
+    geolocation.errorMessage =
+      "L’accès est bloqué dans ton navigateur. Autorise Leco depuis les réglages du site.";
+
+    render(
+      <OnboardingFlow
+        initialProfile={{ ...profile, onboardingStep: 4 }}
+        interests={interests}
+      />,
+    );
+
+    expect(screen.getByText("Permission bloquée")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(/réglages du site/i);
+    expect(
+      screen.getByRole("button", { name: "Autoriser et enregistrer" }),
+    ).toBeEnabled();
   });
 });

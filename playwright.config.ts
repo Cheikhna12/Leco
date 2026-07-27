@@ -3,6 +3,8 @@ import { defineConfig, devices } from "@playwright/test";
 const browserChannel =
   process.env.PLAYWRIGHT_CHANNEL ??
   (process.platform === "win32" ? "msedge" : undefined);
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3107";
+const serverUrl = new URL(baseURL);
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -12,7 +14,7 @@ export default defineConfig({
   reporter: "html",
   workers: 1,
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL,
     ...(browserChannel ? { channel: browserChannel } : {}),
     trace: "on-first-retry",
   },
@@ -27,8 +29,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
+    command: `npm run dev -- --hostname ${serverUrl.hostname} --port ${serverUrl.port}`,
+    env: {
+      NEXT_PUBLIC_APP_URL: baseURL,
+    },
+    reuseExistingServer: false,
+    url: baseURL,
   },
 });

@@ -3,12 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  ArrowIcon,
-  CheckIcon,
-  MapPinIcon,
-  ShieldIcon,
-} from "@/components/ui/icons";
+import { ArrowIcon, CheckIcon, ShieldIcon } from "@/components/ui/icons";
+import { LocationOrbIllustration } from "@/components/ui/location-orb-illustration";
 import {
   GENDERS,
   profileDraftSchema,
@@ -19,6 +15,7 @@ import type {
   OnboardingState,
   ProfilePhoto,
 } from "@/features/profiles/profile-types";
+import { useGeolocation, type GeolocationState } from "@/hooks/use-geolocation";
 
 const STEPS = [
   { number: 1, label: "À propos de toi" },
@@ -40,8 +37,6 @@ type Props = {
   interests: Interest[];
   mode?: "onboarding" | "profile";
 };
-
-type LocationPermission = "idle" | "requesting" | "granted" | "denied";
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
@@ -67,9 +62,8 @@ export function OnboardingFlow({
   );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [locationPermission, setLocationPermission] =
-    useState<LocationPermission>("idle");
   const [success, setSuccess] = useState(false);
+  const location = useGeolocation();
 
   const progress = `${(step / STEPS.length) * 100}%`;
   const selectedInterests = useMemo(
@@ -211,23 +205,13 @@ export function OnboardingFlow({
     update("interestIds", next);
   }
 
-  function requestLocation() {
+  async function requestLocation() {
     setError("");
-    if (!navigator.geolocation) {
-      setError("La géolocalisation n’est pas disponible sur ce navigateur.");
-      setLocationPermission("denied");
-      return;
-    }
-    setLocationPermission("requesting");
-    navigator.geolocation.getCurrentPosition(
-      () => setLocationPermission("granted"),
-      () => setLocationPermission("denied"),
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 12_000 },
-    );
+    await location.requestLocation();
   }
 
   async function finish() {
-    if (locationPermission !== "granted") {
+    if (location.state !== "ready") {
       setError("Autorise ta localisation pour continuer vers la présence.");
       return;
     }
@@ -325,8 +309,9 @@ export function OnboardingFlow({
           ) : null}
           {step === 4 ? (
             <LocationStep
-              permission={locationPermission}
-              requestLocation={requestLocation}
+              errorMessage={location.errorMessage}
+              requestLocation={() => void requestLocation()}
+              state={location.state}
             />
           ) : null}
 
@@ -615,12 +600,32 @@ function InterestsStep({
 }
 
 function LocationStep({
-  permission,
+  errorMessage,
   requestLocation,
+  state,
 }: {
-  permission: LocationPermission;
+  errorMessage: string | null;
   requestLocation: () => void;
+  state: GeolocationState;
 }) {
+  const isReady = state === "ready";
+  const isPending = state === "checking" || state === "requesting";
+  const stateLabel = isReady
+    ? "Position enregistrée"
+    : state === "blocked"
+      ? "Permission bloquée"
+      : state === "denied"
+        ? "Permission refusée"
+        : state === "inaccurate"
+          ? "Signal trop imprécis"
+          : state === "timeout"
+            ? "Délai dépassé"
+            : state === "unavailable"
+              ? "Position indisponible"
+              : state === "unsupported"
+                ? "Navigateur incompatible"
+                : "À toi de choisir";
+
   return (
     <>
       <header className="onboarding-heading">
@@ -632,35 +637,28 @@ function LocationStep({
         </p>
       </header>
       <div className="location-consent">
-        <div className="location-consent__orbit">
-          <i />
-          <i />
-          <span>
-            <MapPinIcon />
-          </span>
-        </div>
+        <LocationOrbIllustration className="location-consent__illustration" />
         <div>
-          <strong>
-            {permission === "granted"
-              ? "Autorisation accordée"
-              : permission === "denied"
-                ? "Autorisation non accordée"
-                : "À toi de choisir"}
-          </strong>
+          <strong>{stateLabel}</strong>
           <p>
             Leco demandera ta position uniquement pour la présence active. Aucun
             historique de déplacement n’est conservé.
           </p>
+          {errorMessage ? (
+            <p className="location-consent__error" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
           <button
-            disabled={permission === "requesting" || permission === "granted"}
+            disabled={isPending || isReady || state === "unsupported"}
             onClick={requestLocation}
             type="button"
           >
-            {permission === "requesting"
-              ? "Demande en cours…"
-              : permission === "granted"
-                ? "Position autorisée"
-                : "Autoriser ma position"}
+            {isPending
+              ? "Localisation en cours…"
+              : isReady
+                ? "Position enregistrée"
+                : "Autoriser et enregistrer"}
           </button>
         </div>
       </div>

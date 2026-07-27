@@ -15,6 +15,7 @@ import { usePresenceHeartbeat } from "@/hooks/use-presence-heartbeat";
 
 const OFFLINE_SNAPSHOT: PresenceSnapshot = {
   availableUntil: null,
+  hasValidLocation: false,
   mood: null,
   status: "OFFLINE",
 };
@@ -58,6 +59,7 @@ export function usePresence() {
       const result = await activateCurrentPresence(input);
       setSnapshot({
         availableUntil: result.availableUntil,
+        hasValidLocation: true,
         mood: input.mood,
         status: "AVAILABLE",
       });

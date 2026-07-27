@@ -48,15 +48,14 @@ test.describe("onboarding local réel", () => {
       longitude: -4.0267,
     });
     await page.context().grantPermissions(["geolocation"]);
-    await page.getByRole("button", { name: /autoriser ma position/i }).click();
-    await expect(page.getByText("Autorisation accordée")).toBeVisible();
+    await page
+      .getByRole("button", { name: /autoriser et enregistrer/i })
+      .click();
+    await expect(page.getByText("Position enregistrée")).toBeVisible();
     await page.getByRole("button", { name: "Terminer" }).click();
     await expect(page).toHaveURL(/\/presence/);
 
-    await page.getByRole("button", { name: /je veux être visible/i }).click();
-    await page
-      .getByRole("button", { name: /autoriser pour continuer/i })
-      .click();
+    await expect(page.getByRole("group", { name: /ton mood/i })).toBeVisible();
     await page.getByRole("button", { name: /je suis dispo/i }).click();
     await expect(page.getByText("Signal actif")).toBeVisible();
 

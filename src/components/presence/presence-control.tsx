@@ -33,7 +33,7 @@ export function PresenceControl() {
   const location = useGeolocation();
   const presence = usePresence();
   const [showConsent, setShowConsent] = useState(false);
-  const [locationReady, setLocationReady] = useState(false);
+  const [sessionLocationReady, setSessionLocationReady] = useState(false);
   const [mood, setMood] = useState<Mood>("discuter");
   const [duration, setDuration] = useState<PresenceDuration>(60);
   const active = presence.snapshot.status === "AVAILABLE";
@@ -44,10 +44,13 @@ export function PresenceControl() {
     () => formatRemaining(presence.snapshot.availableUntil),
     [presence.snapshot.availableUntil],
   );
+  const locationReady =
+    sessionLocationReady ||
+    (!presence.loading && presence.snapshot.hasValidLocation);
 
   async function allowLocation() {
     const updated = await location.requestLocation();
-    setLocationReady(updated);
+    setSessionLocationReady(updated);
 
     if (updated) {
       setShowConsent(false);
@@ -61,7 +64,7 @@ export function PresenceControl() {
     });
 
     if (activated) {
-      setLocationReady(false);
+      setSessionLocationReady(false);
     }
   }
 

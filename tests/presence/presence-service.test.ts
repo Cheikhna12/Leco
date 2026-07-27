@@ -152,4 +152,31 @@ describe("PresenceService", () => {
       p_hidden: false,
     });
   });
+
+  it("indique une position encore valide sans exposer ses coordonnées", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: [
+        {
+          availability_status: "offline",
+          available_until: null,
+          has_valid_location: true,
+          mood: null,
+        },
+      ],
+      error: null,
+    });
+    const { service } = createService({ rpc });
+
+    const snapshot = await service.getSnapshot();
+
+    expect(snapshot).toEqual({
+      availableUntil: null,
+      hasValidLocation: true,
+      mood: null,
+      status: "OFFLINE",
+    });
+    expect(JSON.stringify(snapshot)).not.toMatch(
+      /latitude|longitude|accuracy|coordinates/i,
+    );
+  });
 });

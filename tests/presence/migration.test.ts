@@ -2,24 +2,29 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-const migration = readFileSync(
-  path.join(
-    process.cwd(),
-    "supabase/migrations/0006_wave2_location_presence.sql",
-  ),
-  "utf8",
-);
+const migration = [
+  "0006_wave2_location_presence.sql",
+  "0007_wave2_location_readiness.sql",
+]
+  .map((file) =>
+    readFileSync(path.join(process.cwd(), "supabase/migrations", file), "utf8"),
+  )
+  .join("\n");
 
 describe("migration présence de vague 2", () => {
   it("n’expose aucun champ de localisation dans le read model", () => {
-    const readModel = migration.match(
-      /create or replace function public\.get_my_presence\(\)[\s\S]*?\$\$;/i,
-    )?.[0];
+    const readModels = [
+      ...migration.matchAll(
+        /create(?: or replace)? function public\.get_my_presence\(\)[\s\S]*?\$\$;/gi,
+      ),
+    ];
+    const readModel = readModels.at(-1)?.[0];
 
     expect(readModel).toBeTruthy();
     expect(readModel).not.toMatch(
-      /latitude|longitude|user_locations|accuracy_m/i,
+      /latitude|longitude|accuracy_m|st_x|st_y|st_asgeojson/i,
     );
+    expect(readModel).toMatch(/has_valid_location boolean/i);
   });
 
   it("expire après cinq minutes sans heartbeat", () => {

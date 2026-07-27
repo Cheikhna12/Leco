@@ -36,6 +36,7 @@ export interface PresenceRpcClient {
 interface PresenceRow {
   availability_status: "available" | "hidden" | "offline";
   available_until: string | null;
+  has_valid_location: boolean;
   mood: Mood | null;
 }
 
@@ -194,6 +195,7 @@ export class PresenceService {
           : "OFFLINE",
       mood: active ? (row?.mood ?? null) : null,
       availableUntil: active ? (row?.available_until ?? null) : null,
+      hasValidLocation: Boolean(row?.has_valid_location),
     };
   }
 }

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const appOrigin = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3107";
+
 test.describe("présence protégée", () => {
   test("redirige vers la connexion sans session", async ({ page }) => {
     await page.goto("/presence");
@@ -18,7 +20,7 @@ test.describe("présence protégée", () => {
         longitude: -4.0267,
       },
       headers: {
-        Origin: "http://127.0.0.1:3000",
+        Origin: appOrigin,
       },
     });
     const body = await response.text();

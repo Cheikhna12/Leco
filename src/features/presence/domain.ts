@@ -82,4 +82,5 @@ export interface PresenceSnapshot {
   status: PresenceAvailability;
   mood: Mood | null;
   availableUntil: string | null;
+  hasValidLocation: boolean;
 }

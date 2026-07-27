@@ -746,6 +746,7 @@ export type Database = {
         Returns: {
           availability_status: Database["public"]["Enums"]["availability_status"];
           available_until: string | null;
+          has_valid_location: boolean;
           mood: Database["public"]["Enums"]["mood"] | null;
         }[];
       };

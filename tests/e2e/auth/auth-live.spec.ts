@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const liveAuthEnabled = process.env.E2E_AUTH_LIVE === "true";
 const developmentCode = process.env.E2E_DEVELOPMENT_OTP_CODE;
+const appOrigin = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3107";
 
 test.describe("session OTP locale réelle", () => {
   test.skip(
@@ -34,7 +35,7 @@ test.describe("session OTP locale réelle", () => {
     });
 
     const logoutResponse = await page.request.post("/api/auth/logout", {
-      headers: { Origin: "http://127.0.0.1:3000" },
+      headers: { Origin: appOrigin },
     });
     expect(logoutResponse.ok()).toBe(true);
 

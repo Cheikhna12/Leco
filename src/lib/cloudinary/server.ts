@@ -4,9 +4,9 @@ import { createHash } from "node:crypto";
 
 import { serverEnv } from "@/lib/env/server";
 
-import { validateProfilePhoto } from "./photo-validation";
+import { sanitizeProfilePhoto } from "./photo-sanitizer";
 
-const PROFILE_TRANSFORMATION = "a_auto,c_fill,g_auto,h_1600,q_auto:good,w_1200";
+const PROFILE_TRANSFORMATION = "c_fill,g_auto,h_1600,q_auto:good,w_1200";
 
 type CloudinaryAsset = {
   public_id: string;
@@ -47,8 +47,8 @@ export async function uploadProfilePhoto(
   width: number;
   height: number;
 }> {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  validateProfilePhoto(bytes);
+  const source = new Uint8Array(await file.arrayBuffer());
+  const sanitized = await sanitizeProfilePhoto(source);
   const { apiKey, apiSecret, cloudName } = config();
   const parameters = {
     folder: `leco/profiles/${userId}`,
@@ -58,8 +58,10 @@ export async function uploadProfilePhoto(
     unique_filename: "true",
     use_filename: "false",
   };
+  const uploadBytes = new Uint8Array(sanitized.bytes.byteLength);
+  uploadBytes.set(sanitized.bytes);
   const body = new FormData();
-  body.set("file", new Blob([bytes]));
+  body.set("file", new Blob([uploadBytes], { type: "image/webp" }));
   for (const [key, value] of Object.entries(parameters)) {
     body.set(key, String(value));
   }
