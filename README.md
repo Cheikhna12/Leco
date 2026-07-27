@@ -16,8 +16,9 @@ La vague 1 fournit :
 - helpers de validation, autorisation, headers et redaction ;
 - interface mobile-first utilisant uniquement des données fictives signalées.
 
-L’authentification, l’onboarding et la géolocalisation produit restent le
-périmètre de la vague 2.
+La vague 2 ajoute l’authentification OTP, les sessions SSR, l’onboarding
+transactionnel avec photos et intérêts, la géolocalisation consentie, la
+disponibilité temporaire et le heartbeat sur un même contrat de session.
 
 ## Prérequis
 
@@ -64,10 +65,61 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<clé publique locale>
 SUPABASE_SERVICE_ROLE_KEY=<clé service locale, serveur uniquement>
 SUPABASE_DB_URL=<URL PostgreSQL locale>
 RATE_LIMIT_HMAC_SECRET=<secret local aléatoire d’au moins 32 caractères>
+SMS_PROVIDER=test
+DEVELOPMENT_OTP_CODE=<code local de six chiffres, jamais en production>
+CAPTCHA_PROVIDER=test
+NEXT_PUBLIC_CAPTCHA_PROVIDER=test
+NEXT_PUBLIC_CAPTCHA_SITE_KEY=<vide pour le fournisseur test>
+CAPTCHA_SECRET_KEY=<vide pour le fournisseur test>
 ```
 
 Ne jamais préfixer une clé service ou un secret par `NEXT_PUBLIC_`. Ne jamais
 committer `.env.local`, un OTP, un JWT, une clé Cloudinary ou des coordonnées.
+
+`SMS_PROVIDER=test` utilise `DevelopmentOtpProvider`. Il crée une identité
+Supabase locale et établit une vraie session SSR, mais ne transmet aucun SMS. Le
+code défini dans `DEVELOPMENT_OTP_CODE` doit être fourni localement à l’équipe,
+jamais écrit dans les logs ou versionné. Le fournisseur lève une erreur au
+démarrage s’il est sélectionné avec `NODE_ENV=production`.
+
+Pour un environnement connecté, utiliser `SMS_PROVIDER=supabase` et configurer
+le fournisseur SMS dans Supabase. Le CAPTCHA prend en charge `turnstile` et
+`hcaptcha`; les variables serveur et `NEXT_PUBLIC_CAPTCHA_*` doivent désigner le
+même fournisseur.
+
+## Authentification et contrat de session
+
+- `/connexion` normalise les mobiles ivoiriens en `+225`, recueille le
+  consentement et demande un OTP avec un message anti-énumération ;
+- `/verification-otp` accepte six chiffres, le collage et la navigation clavier,
+  puis crée la session Supabase dans des cookies SSR ;
+- `/api/auth/session`, `/api/auth/refresh` et `/api/auth/logout` exposent les
+  opérations minimales de session sans retourner de JWT ;
+- les routes `/onboarding`, `/profil` et `/presence` sont protégées par le proxy ;
+- un profil incomplet va vers `/onboarding`, un compte suspendu vers
+  `/acces-restreint`, et un profil complet vers l’accueil.
+
+Le contrat partagé se trouve dans
+`src/features/auth/session-contract.ts`. Les autres fonctionnalités doivent
+utiliser `SessionReader` ou `getServerSession()` depuis
+`src/lib/supabase/session.ts`, et ne jamais décoder directement les cookies ou
+les JWT.
+
+## Géolocalisation et présence
+
+- `/presence` explique l’usage de la position avant tout appel à l’API du
+  navigateur et gère refus, blocage, timeout, indisponibilité et précision
+  insuffisante ;
+- `POST /api/location` valide une position récente, applique le rate limiting et
+  appelle `update_my_location` sans jamais retourner les coordonnées ;
+- `GET`, `POST` et `DELETE /api/presence` lisent, activent et désactivent la
+  présence de l’utilisateur courant ;
+- `POST /api/presence/heartbeat` maintient uniquement une présence active,
+  toutes les 50 secondes lorsque l’onglet est visible ;
+- le heartbeat s’arrête à la déconnexion, à la désactivation et à l’expiration.
+  Cinq minutes sans heartbeat rendent la présence invisible côté base ;
+- les coordonnées exactes restent absentes des réponses, de l’interface et des
+  logs.
 
 ## Validation de la base
 
@@ -102,6 +154,7 @@ npm run db:lint         Lint de tous les schémas
 npm run db:lint:strict  Lint bloquant de public et private
 npm run db:stop         Arrêt Supabase
 npm run validate:wave1  Validation locale complète
+npm run validate:wave2  Validation complète des vagues 1 et 2
 ```
 
 Les commandes demandées peuvent également être lancées directement :
@@ -129,7 +182,17 @@ npm run build
 - Avertissements `extensions.st_findextent` ou `populate_geometry_columns` :
   relancer le lint strict `--schema public,private`; ne pas modifier PostGIS.
 - Login téléphone désactivé : configurer un fournisseur SMS local avant les
-  tests OTP de la vague 2.
+  tests OTP, ou utiliser `SMS_PROVIDER=test` avec les variables locales
+  documentées ci-dessus.
+- Le conteneur Vector peut redémarrer lorsque Docker Desktop ne fournit pas son
+  endpoint interne. Ce défaut d’agrégation des logs locaux ne bloque pas
+  PostgreSQL, PostGIS, Auth, API, Studio ou Realtime, et ne bloque donc pas la
+  vague 2. Ne jamais exposer un daemon Docker non authentifié sur le port `2375`
+  pour le contourner.
+- Ne jamais exécuter `npm audit fix --force` : la correction actuellement
+  proposée rétrograde Next.js vers la version 9 et casserait l’application.
+  Surveiller une mise à jour compatible et faire accepter le risque avant la
+  production.
 - Navigateur Playwright absent : définir `PLAYWRIGHT_CHANNEL=msedge` sur
   Windows ou exécuter `npx playwright install chromium` si l’espace disque le
   permet.
@@ -153,10 +216,16 @@ supabase/
 ├── migrations/
 │   ├── 0001_initial_schema.sql
 │   ├── 0002_rls_policies.sql
-│   └── 0003_wave1_security_hardening.sql
+│   ├── 0003_wave1_security_hardening.sql
+│   ├── 0004_auth_session_context.sql
+│   ├── 0005_wave2_onboarding_profile.sql
+│   └── 0006_wave2_location_presence.sql
 ├── tests/
 │   ├── wave1_rls_and_rpc.sql
-│   └── wave1_concurrency.sql
+│   ├── wave1_concurrency.sql
+│   ├── wave2_auth_session.sql
+│   ├── wave2_onboarding_profile.sql
+│   └── wave2_location_presence.sql
 ├── config.toml
 └── seed.sql
 
@@ -185,10 +254,62 @@ complet de la vague est dans `docs/wave-1-summary.md`.
 - La CSP est actuellement en mode `Report-Only` jusqu’à la propagation des
   nonces et la validation Sentry/PostHog.
 
-## Avant la vague 2
+## Avant le staging et la vague 3
 
 Il reste à choisir et configurer le fournisseur SMS, le CAPTCHA et Cloudinary,
-à créer les routes protégées de l’authentification/onboarding, puis à valider la
-CSP en mode bloquant avec les services d’observabilité retenus. Les alertes
-transitives de `npm audit` dans les dépendances internes de Next.js doivent être
-réévaluées dès qu’une version stable corrigée est publiée.
+à exécuter le parcours live opt-in avec ces services, puis à valider la CSP en
+mode bloquant avec les services d’observabilité retenus. Les alertes transitives
+de `npm audit` dans les dépendances internes de Next.js doivent être réévaluées
+dès qu’une version stable corrigée est publiée.
+
+## Vague 2 — onboarding et profil
+
+Le parcours authentifié `/onboarding` sauvegarde progressivement quatre étapes :
+informations principales, photos, centres d’intérêt et consentement de
+géolocalisation. Un parcours interrompu reprend depuis l’étape conservée en base.
+La page `/profil` réutilise le même contrat pour les modifications autorisées.
+
+Les mutations de profil passent exclusivement par les RPC de la migration
+`0005_wave2_onboarding_profile.sql`. Elles utilisent `auth.uid()`, un
+`search_path` vide et des droits d’exécution limités à `authenticated`. La date
+de naissance est verrouillée après sa première validation et devra passer par
+une procédure de vérification distincte pour être corrigée.
+
+Les photos sont envoyées à `POST /api/photos`. Le serveur :
+
+- limite les fichiers à 8 Mo ;
+- détecte JPEG, PNG ou WebP depuis leur signature binaire ;
+- refuse HEIC tant qu’aucun convertisseur serveur n’est configuré ;
+- réalise un upload Cloudinary signé avec une transformation d’orientation,
+  recadrage et optimisation qui ne conserve pas les métadonnées EXIF ;
+- n’expose jamais `CLOUDINARY_API_SECRET` au navigateur.
+
+Cloudinary doit être configuré uniquement dans `.env.local` :
+
+```text
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Le test Playwright complet est opt-in afin de ne pas consommer Cloudinary et
+l’OTP à chaque validation :
+
+```powershell
+$env:E2E_ONBOARDING_LIVE="true"
+$env:E2E_AUTH_LIVE="true"
+$env:E2E_DEVELOPMENT_OTP_CODE="000000"
+$env:E2E_PROFILE_PHOTO_ONE="D:\fixtures\portrait-1.jpg"
+$env:E2E_PROFILE_PHOTO_TWO="D:\fixtures\portrait-2.jpg"
+npx playwright test tests/e2e/onboarding/onboarding-live.spec.ts
+```
+
+Ces scénarios sont volontairement ignorés lorsque les variables opt-in ou les
+identifiants Cloudinary sont absents. Les tests Playwright par défaut utilisent
+uniquement des mocks aux frontières réseau pour les erreurs OTP ; ils ne
+simulent ni Supabase, ni Cloudinary à l’intérieur du code métier. La validation
+live doit être exécutée avant staging avec des comptes et médias de test.
+
+Le consentement de localisation est demandé seulement au dernier écran, après
+une explication. La capture et l’enregistrement sécurisé de la position restent
+du ressort du module présence/localisation de la vague 2.

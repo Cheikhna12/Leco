@@ -1,0 +1,80 @@
+import path from "node:path";
+
+import { expect, test } from "@playwright/test";
+
+const liveEnabled = process.env.E2E_ONBOARDING_LIVE === "true";
+const developmentCode = process.env.E2E_DEVELOPMENT_OTP_CODE;
+const fixtureOne = process.env.E2E_PROFILE_PHOTO_ONE;
+const fixtureTwo = process.env.E2E_PROFILE_PHOTO_TWO;
+
+test.describe("onboarding local réel", () => {
+  test.skip(
+    !liveEnabled || !developmentCode || !fixtureOne || !fixtureTwo,
+    "Nécessite Supabase Auth, Cloudinary test et deux photos locales.",
+  );
+
+  test("OTP → profil → photos → intérêts → consentement", async ({ page }) => {
+    await page.goto("/connexion");
+    await page.getByLabel("Numéro mobile").fill("07 00 00 12 45");
+    await page.getByRole("checkbox").check();
+    await page.getByRole("button", { name: /recevoir mon code/i }).click();
+    await page.getByLabel("Chiffre 1 sur 6").fill(developmentCode!);
+    await page.getByRole("button", { name: /confirmer le code/i }).click();
+    await expect(page).toHaveURL(/\/onboarding/);
+
+    await page.getByLabel("Prénom").fill("Awa");
+    await page.getByLabel("Date de naissance").fill("2000-05-14");
+    await page.getByLabel("Femme", { exact: true }).first().check();
+    await page.getByLabel("Homme", { exact: true }).nth(1).check();
+    await page
+      .getByLabel("Quelques mots")
+      .fill("Toujours partante pour une expo.");
+    await page.getByLabel(/je confirme avoir au moins 18 ans/i).check();
+    await page.getByRole("button", { name: /continuer/i }).click();
+
+    const chooser = page.locator('input[type="file"]');
+    await chooser.setInputFiles(path.resolve(fixtureOne!));
+    await chooser.setInputFiles(path.resolve(fixtureTwo!));
+    await expect(page.getByText("Principale")).toBeVisible();
+    await page.getByRole("button", { name: /continuer/i }).click();
+
+    await page.getByRole("button", { name: "Art" }).click();
+    await page.getByRole("button", { name: "Cinéma" }).click();
+    await page.getByRole("button", { name: /continuer/i }).click();
+
+    await page.context().setGeolocation({
+      accuracy: 20,
+      latitude: 5.3364,
+      longitude: -4.0267,
+    });
+    await page.context().grantPermissions(["geolocation"]);
+    await page
+      .getByRole("button", { name: /autoriser et enregistrer/i })
+      .click();
+    await expect(page.getByText("Position enregistrée")).toBeVisible();
+    await page.getByRole("button", { name: "Terminer" }).click();
+    await expect(page).toHaveURL(/\/presence/);
+
+    await expect(page.getByRole("group", { name: /ton mood/i })).toBeVisible();
+    await page.getByRole("button", { name: /je suis dispo/i }).click();
+    await expect(page.getByText("Signal actif")).toBeVisible();
+
+    const heartbeat = await page.evaluate(async () => {
+      const response = await fetch("/api/presence/heartbeat", {
+        method: "POST",
+      });
+      return { body: await response.text(), ok: response.ok };
+    });
+    expect(heartbeat.ok).toBe(true);
+    expect(heartbeat.body).not.toMatch(/latitude|longitude|5\.3364|-4\.0267/i);
+
+    await page.getByRole("button", { name: "Je suis off" }).last().click();
+    await expect(page.getByText("Signal éteint")).toBeVisible();
+
+    const logout = await page.evaluate(async () => {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      return response.ok;
+    });
+    expect(logout).toBe(true);
+  });
+});

@@ -32,7 +32,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run lint && npm run test",
-    "validate:wave1": "npm run db:reset && npm run db:lint:strict && npm run test:db:local && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:e2e && npm run build"
+    "validate:wave1": "npm run db:reset && npm run db:lint:strict && npm run test:db:local && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:e2e && npm run build",
+    "validate:wave2": "npm run db:reset && npm run db:lint:strict && npm run test:db:local && npm run typecheck && npm run lint && npm run format:check && npm run test && npm run test:e2e && npm run build"
   },
   "dependencies": {
     "@fontsource-variable/bodoni-moda": "^5.3.0",

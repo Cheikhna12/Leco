@@ -19,7 +19,7 @@ const securityHeaders = buildSecurityHeaders({
 );
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["127.0.0.1"],
+  allowedDevOrigins: ["127.0.0.1", "192.168.1.176"],
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {

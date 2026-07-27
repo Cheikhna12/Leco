@@ -19,6 +19,7 @@ export type RateLimitOperation =
   | "otpRequest"
   | "otpVerification"
   | "locationUpdate"
+  | "presenceChange"
   | "heartbeat"
   | "discovery"
   | "hello"
@@ -30,6 +31,7 @@ export const RATE_LIMIT_POLICIES = {
   otpRequest: { limit: 3, windowSeconds: 15 * 60 },
   otpVerification: { limit: 5, windowSeconds: 15 * 60 },
   locationUpdate: { limit: 60, windowSeconds: 60 },
+  presenceChange: { limit: 12, windowSeconds: 60 },
   heartbeat: { limit: 20, windowSeconds: 60 },
   discovery: { limit: 30, windowSeconds: 60 },
   hello: { limit: 5, windowSeconds: 60 * 60 },
