@@ -459,7 +459,7 @@
 
   .auth-shell__form {
     align-items: center;
-    background: color-mix(in oklch, var(--color-paper-2) 72%, transparent);
+    background: var(--color-paper);
     border-left: 1px solid var(--color-rule);
     min-height: 100svh;
     padding-block: 3rem;
