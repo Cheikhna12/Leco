@@ -98,13 +98,12 @@ export function PhoneForm() {
               setLocalNumber(event.target.value);
               setError(undefined);
             }}
-            aria-describedby={error ? "phone-error" : "phone-hint"}
+            aria-describedby={error ? "phone-error" : undefined}
             aria-invalid={Boolean(error)}
             disabled={pending}
             required
           />
         </span>
-        <small id="phone-hint">01, 05 ou 07</small>
       </label>
 
       <label className="auth-consent">

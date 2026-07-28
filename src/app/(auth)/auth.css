@@ -190,7 +190,7 @@
 
 .auth-card {
   animation: auth-card-enter 340ms var(--ease-out) both;
-  background: color-mix(in oklch, var(--color-paper-2) 94%, transparent);
+  background: var(--color-paper);
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-float);
