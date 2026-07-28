@@ -1,0 +1,100 @@
+.root {
+  aspect-ratio: 260 / 220;
+  contain: layout paint style;
+  isolation: isolate;
+  position: relative;
+}
+
+.root::before {
+  background: radial-gradient(
+    ellipse at 50% 76%,
+    color-mix(in oklch, var(--color-accent) 24%, transparent),
+    transparent 64%
+  );
+  content: "";
+  inset: 12% 2% 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.canvas,
+.fallback {
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.canvas {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.fallback {
+  filter: drop-shadow(0 1.25rem 1.5rem rgb(8 4 5 / 22%));
+  opacity: 1;
+  overflow: visible;
+  transform-origin: center;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.root[data-webgl="ready"] .canvas {
+  opacity: 1;
+}
+
+.root[data-webgl="ready"] .fallback {
+  opacity: 0;
+}
+
+.fallbackMap {
+  animation: fallback-map-drift 7s ease-in-out infinite;
+  transform-origin: 130px 140px;
+}
+
+.fallbackBeacon {
+  animation: fallback-beacon-float 3.6s ease-in-out infinite;
+  transform-origin: 130px 146px;
+}
+
+.root[data-status="locating"] .fallbackBeacon {
+  animation-duration: 1.6s;
+}
+
+.root[data-status="ready"] .fallbackBeacon {
+  animation-duration: 5s;
+}
+
+@keyframes fallback-map-drift {
+  0%,
+  100% {
+    transform: skewY(-0.2deg) scale(1);
+  }
+
+  50% {
+    transform: skewY(0.5deg) scale(1.012);
+  }
+}
+
+@keyframes fallback-beacon-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.4deg);
+  }
+
+  50% {
+    transform: translateY(-5px) rotate(0.7deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas,
+  .fallback {
+    transition: none;
+  }
+
+  .fallbackMap,
+  .fallbackBeacon {
+    animation: none;
+  }
+}

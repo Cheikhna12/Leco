@@ -1,37 +1,37 @@
 /* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4
- * genre: atmospheric · theme: Lumen / Night Foundry
- * palette: dark warm graphite · ember accent · roman display
+ * genre: editorial · theme: Lumen
+ * palette: crisp white · warm ivory surfaces · coral accent · roman display
  */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --color-paper: oklch(15% 0.012 55);
-  --color-paper-2: oklch(19% 0.014 55);
-  --color-paper-3: oklch(23% 0.015 55);
-  --color-paper-4: oklch(28% 0.016 55);
-  --color-ink: oklch(95% 0.014 82);
-  --color-ink-2: oklch(86% 0.012 76);
-  --color-muted: oklch(70% 0.012 70);
-  --color-neutral: oklch(55% 0.013 65);
-  --color-rule: oklch(29% 0.014 55);
-  --color-rule-2: oklch(39% 0.016 55);
-  --color-accent: oklch(72% 0.16 63);
-  --color-accent-strong: oklch(64% 0.18 58);
-  --color-accent-soft: oklch(31% 0.055 58);
-  --color-accent-ink: oklch(17% 0.016 52);
-  --color-focus: oklch(80% 0.17 65);
-  --color-success: oklch(73% 0.12 148);
-  --color-success-soft: oklch(27% 0.035 148);
-  --color-danger: oklch(70% 0.17 25);
-  --color-danger-soft: oklch(27% 0.04 25);
-  --color-profile-1: oklch(66% 0.12 31);
-  --color-profile-2: oklch(70% 0.1 85);
-  --color-profile-3: oklch(64% 0.09 322);
-  --color-profile-ink: oklch(18% 0.014 55);
-  --color-shadow: oklch(6% 0.01 55 / 0.34);
-  --color-overlay: oklch(8% 0.012 55 / 0.72);
-  --color-bloom-warm: oklch(58% 0.14 42 / 0.13);
-  --color-bloom-gold: oklch(72% 0.14 72 / 0.08);
+  --color-paper: oklch(100% 0 0);
+  --color-paper-2: oklch(98% 0.006 82);
+  --color-paper-3: oklch(95% 0.012 80);
+  --color-paper-4: oklch(91% 0.014 76);
+  --color-ink: oklch(18% 0.014 55);
+  --color-ink-2: oklch(29% 0.014 55);
+  --color-muted: oklch(44% 0.014 58);
+  --color-neutral: oklch(56% 0.013 62);
+  --color-rule: oklch(89% 0.012 76);
+  --color-rule-2: oklch(72% 0.018 70);
+  --color-accent: oklch(60% 0.17 58);
+  --color-accent-strong: oklch(53% 0.18 54);
+  --color-accent-soft: oklch(94% 0.03 68);
+  --color-accent-ink: oklch(99% 0.004 80);
+  --color-focus: oklch(52% 0.18 55);
+  --color-success: oklch(48% 0.12 148);
+  --color-success-soft: oklch(94% 0.03 148);
+  --color-danger: oklch(52% 0.17 25);
+  --color-danger-soft: oklch(94% 0.03 25);
+  --color-profile-1: oklch(78% 0.1 31);
+  --color-profile-2: oklch(83% 0.08 85);
+  --color-profile-3: oklch(77% 0.075 322);
+  --color-profile-ink: oklch(19% 0.014 55);
+  --color-shadow: oklch(20% 0.012 55 / 0.1);
+  --color-overlay: oklch(18% 0.012 55 / 0.5);
+  --color-bloom-warm: oklch(72% 0.11 42 / 0.08);
+  --color-bloom-gold: oklch(82% 0.1 72 / 0.08);
 
   --font-display:
     "Bodoni Moda Variable", "Bodoni Moda", "Times New Roman", serif;
@@ -114,33 +114,33 @@
 [data-theme="light"] {
   color-scheme: light;
 
-  --color-paper: oklch(97% 0.012 82);
-  --color-paper-2: oklch(94% 0.014 80);
-  --color-paper-3: oklch(91% 0.015 78);
-  --color-paper-4: oklch(87% 0.016 76);
+  --color-paper: oklch(100% 0 0);
+  --color-paper-2: oklch(98% 0.006 82);
+  --color-paper-3: oklch(95% 0.012 80);
+  --color-paper-4: oklch(91% 0.014 76);
   --color-ink: oklch(18% 0.014 55);
   --color-ink-2: oklch(29% 0.014 55);
   --color-muted: oklch(44% 0.014 58);
   --color-neutral: oklch(56% 0.013 62);
-  --color-rule: oklch(85% 0.016 74);
-  --color-rule-2: oklch(70% 0.018 70);
+  --color-rule: oklch(89% 0.012 76);
+  --color-rule-2: oklch(72% 0.018 70);
   --color-accent: oklch(60% 0.17 58);
   --color-accent-strong: oklch(53% 0.18 54);
-  --color-accent-soft: oklch(92% 0.035 68);
-  --color-accent-ink: oklch(98% 0.01 80);
+  --color-accent-soft: oklch(94% 0.03 68);
+  --color-accent-ink: oklch(99% 0.004 80);
   --color-focus: oklch(52% 0.18 55);
   --color-success: oklch(48% 0.12 148);
-  --color-success-soft: oklch(92% 0.035 148);
+  --color-success-soft: oklch(94% 0.03 148);
   --color-danger: oklch(52% 0.17 25);
-  --color-danger-soft: oklch(92% 0.035 25);
-  --color-profile-1: oklch(74% 0.11 31);
-  --color-profile-2: oklch(79% 0.09 85);
-  --color-profile-3: oklch(73% 0.085 322);
+  --color-danger-soft: oklch(94% 0.03 25);
+  --color-profile-1: oklch(78% 0.1 31);
+  --color-profile-2: oklch(83% 0.08 85);
+  --color-profile-3: oklch(77% 0.075 322);
   --color-profile-ink: oklch(19% 0.014 55);
-  --color-shadow: oklch(20% 0.012 55 / 0.12);
-  --color-overlay: oklch(18% 0.012 55 / 0.52);
-  --color-bloom-warm: oklch(68% 0.13 42 / 0.1);
-  --color-bloom-gold: oklch(78% 0.12 72 / 0.09);
+  --color-shadow: oklch(20% 0.012 55 / 0.1);
+  --color-overlay: oklch(18% 0.012 55 / 0.5);
+  --color-bloom-warm: oklch(72% 0.11 42 / 0.08);
+  --color-bloom-gold: oklch(82% 0.1 72 / 0.08);
 }
 
 @media (prefers-color-scheme: light) {

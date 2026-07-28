@@ -18,11 +18,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  colorScheme: "light dark",
-  themeColor: [
-    { color: "#f8f4ec", media: "(prefers-color-scheme: light)" },
-    { color: "#211d1a", media: "(prefers-color-scheme: dark)" },
-  ],
+  colorScheme: "light",
+  themeColor: "#ffffff",
   viewportFit: "cover",
   width: "device-width",
 };
@@ -31,7 +28,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="fr">
+    <html data-scroll-behavior="smooth" data-theme="light" lang="fr">
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

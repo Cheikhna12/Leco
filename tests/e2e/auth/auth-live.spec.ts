@@ -13,6 +13,21 @@ test.describe("session OTP locale réelle", () => {
   test("numéro → OTP → session → onboarding → déconnexion", async ({
     page,
   }) => {
+    const browserErrors: string[] = [];
+
+    page.on("console", (message) => {
+      if (
+        message.type() === "error" &&
+        (message.text().includes("unhandledRejection") ||
+          message.text().includes("[leco:unhandledrejection]"))
+      ) {
+        browserErrors.push(message.text());
+      }
+    });
+    page.on("pageerror", (error) => {
+      browserErrors.push(error.stack ?? error.message);
+    });
+
     await page.goto("/connexion");
     await page.getByLabel("Numéro mobile").fill("07 00 00 12 35");
     await page.getByRole("checkbox").check();
@@ -41,6 +56,7 @@ test.describe("session OTP locale réelle", () => {
 
     await page.goto("/presence");
     await expect(page).toHaveURL(/\/connexion/);
+    expect(browserErrors).toEqual([]);
   });
 
   test("refuse un OTP incorrect sans exposer le numéro complet", async ({

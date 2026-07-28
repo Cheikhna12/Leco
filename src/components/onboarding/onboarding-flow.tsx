@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ArrowIcon, CheckIcon, ShieldIcon } from "@/components/ui/icons";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { LocationOrbIllustration } from "@/components/ui/location-orb-illustration";
 import {
   GENDERS,
@@ -237,9 +238,7 @@ export function OnboardingFlow({
         <span className="onboarding-success__mark">
           <CheckIcon />
         </span>
-        <p className="onboarding-kicker">Profil prêt</p>
         <h1>Bienvenue dans le mouvement.</h1>
-        <p>Ton espace est prêt. On te conduit vers ta présence Leco.</p>
       </section>
     );
   }
@@ -254,9 +253,6 @@ export function OnboardingFlow({
           <h1>
             Un profil qui te <em>ressemble.</em>
           </h1>
-          <p className="onboarding-rail__lede">
-            Quatre étapes sobres. Tes informations privées restent protégées.
-          </p>
         </div>
 
         <ol className="onboarding-steps" aria-label="Progression">
@@ -287,38 +283,38 @@ export function OnboardingFlow({
         </div>
 
         <div className="onboarding-panel">
-          {step === 1 ? (
-            <InformationStep profile={profile} update={update} />
-          ) : null}
-          {step === 2 ? (
-            <PhotosStep
-              busy={busy}
-              fileInputRef={fileInputRef}
-              movePhoto={movePhoto}
-              photos={profile.photos}
-              removePhoto={removePhoto}
-              uploadPhoto={uploadPhoto}
-            />
-          ) : null}
-          {step === 3 ? (
-            <InterestsStep
-              interests={interests}
-              selected={selectedInterests}
-              toggle={toggleInterest}
-            />
-          ) : null}
-          {step === 4 ? (
-            <LocationStep
-              errorMessage={location.errorMessage}
-              requestLocation={() => void requestLocation()}
-              state={location.state}
-            />
-          ) : null}
+          <div className="onboarding-step-content" key={step}>
+            {step === 1 ? (
+              <InformationStep profile={profile} update={update} />
+            ) : null}
+            {step === 2 ? (
+              <PhotosStep
+                busy={busy}
+                fileInputRef={fileInputRef}
+                movePhoto={movePhoto}
+                photos={profile.photos}
+                removePhoto={removePhoto}
+                uploadPhoto={uploadPhoto}
+              />
+            ) : null}
+            {step === 3 ? (
+              <InterestsStep
+                interests={interests}
+                selected={selectedInterests}
+                toggle={toggleInterest}
+              />
+            ) : null}
+            {step === 4 ? (
+              <LocationStep
+                errorMessage={location.errorMessage}
+                requestLocation={() => void requestLocation()}
+                state={location.state}
+              />
+            ) : null}
+          </div>
 
           {error ? (
-            <p className="onboarding-error" role="alert">
-              {error}
-            </p>
+            <InlineFeedback live="assertive">{error}</InlineFeedback>
           ) : null}
 
           <footer className="onboarding-actions">
@@ -361,11 +357,7 @@ function InformationStep({
   return (
     <>
       <header className="onboarding-heading">
-        <p className="onboarding-kicker">Le commencement</p>
         <h2>Comment veux-tu être présenté·e&nbsp;?</h2>
-        <p>
-          Reste simple et sincère. Tu pourras ajuster les éléments autorisés.
-        </p>
       </header>
       <div className="onboarding-form-grid">
         <label className="onboarding-field">
@@ -386,9 +378,6 @@ function InformationStep({
             type="date"
             value={profile.birthDate}
           />
-          <small>
-            Après validation, une modification demande une vérification dédiée.
-          </small>
         </label>
       </div>
       <fieldset className="onboarding-choice-group">
@@ -471,12 +460,8 @@ function PhotosStep({
   return (
     <>
       <header className="onboarding-heading">
-        <p className="onboarding-kicker">Ta présence en images</p>
-        <h2>Deux photos qui racontent déjà quelque chose.</h2>
-        <p>
-          La première sera ta photo principale. Tu peux en ajouter jusqu’à
-          quatre.
-        </p>
+        <h2>Ajoute tes photos.</h2>
+        <p>2 à 4 · la première est principale.</p>
       </header>
       <div className="photo-studio">
         {photos.map((photo, index) => (
@@ -548,10 +533,6 @@ function PhotosStep({
         ref={fileInputRef}
         type="file"
       />
-      <p className="photo-note">
-        Les métadonnées de l’image sont retirées et chaque photo passe par une
-        vérification avant diffusion.
-      </p>
     </>
   );
 }
@@ -568,12 +549,7 @@ function InterestsStep({
   return (
     <>
       <header className="onboarding-heading">
-        <p className="onboarding-kicker">Les bons prétextes</p>
         <h2>Qu’est-ce qui pourrait lancer la conversation&nbsp;?</h2>
-        <p>
-          Choisis deux ou trois affinités. La sélection vient directement de
-          Leco.
-        </p>
       </header>
       <div className="interest-counter" aria-live="polite">
         <span>{selected.size}</span>
@@ -612,45 +588,45 @@ function LocationStep({
   const isPending = state === "checking" || state === "requesting";
   const stateLabel = isReady
     ? "Position enregistrée"
-    : state === "blocked"
-      ? "Permission bloquée"
-      : state === "denied"
-        ? "Permission refusée"
-        : state === "inaccurate"
-          ? "Signal trop imprécis"
-          : state === "timeout"
-            ? "Délai dépassé"
-            : state === "unavailable"
-              ? "Position indisponible"
-              : state === "unsupported"
-                ? "Navigateur incompatible"
-                : "À toi de choisir";
+    : state === "insecure"
+      ? "HTTPS requis"
+      : state === "blocked"
+        ? "Permission bloquée"
+        : state === "denied"
+          ? "Permission refusée"
+          : state === "inaccurate"
+            ? "Signal trop imprécis"
+            : state === "timeout"
+              ? "Délai dépassé"
+              : state === "unavailable"
+                ? "Position indisponible"
+                : state === "unsupported"
+                  ? "Navigateur incompatible"
+                  : "À toi de choisir";
 
   return (
     <>
       <header className="onboarding-heading">
-        <p className="onboarding-kicker">Ici, maintenant</p>
         <h2>Découvre le mouvement autour de toi.</h2>
-        <p>
-          Ta position nous aide à te montrer les personnes actives autour de
-          toi. Ta position exacte n’est jamais montrée aux autres utilisateurs.
-        </p>
       </header>
       <div className="location-consent">
-        <LocationOrbIllustration className="location-consent__illustration" />
+        <LocationOrbIllustration
+          className="location-consent__illustration"
+          status={isReady ? "ready" : isPending ? "locating" : "idle"}
+        />
         <div>
           <strong>{stateLabel}</strong>
-          <p>
-            Leco demandera ta position uniquement pour la présence active. Aucun
-            historique de déplacement n’est conservé.
-          </p>
+          <p>Utilisée pendant ta présence · aucun historique.</p>
           {errorMessage ? (
-            <p className="location-consent__error" role="alert">
-              {errorMessage}
-            </p>
+            <InlineFeedback live="assertive">{errorMessage}</InlineFeedback>
           ) : null}
           <button
-            disabled={isPending || isReady || state === "unsupported"}
+            disabled={
+              isPending ||
+              isReady ||
+              state === "unsupported" ||
+              state === "insecure"
+            }
             onClick={requestLocation}
             type="button"
           >
@@ -658,7 +634,9 @@ function LocationStep({
               ? "Localisation en cours…"
               : isReady
                 ? "Position enregistrée"
-                : "Autoriser et enregistrer"}
+                : state === "insecure"
+                  ? "Ouvre Leco en HTTPS"
+                  : "Autoriser et enregistrer"}
           </button>
         </div>
       </div>

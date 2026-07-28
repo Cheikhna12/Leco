@@ -5,12 +5,13 @@ import { LecoMark } from "@/components/ui/leco-mark";
 import { ShieldIcon } from "@/components/ui/icons";
 
 type AuthShellProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: ReactNode;
-  description: string;
+  description?: string;
   children: ReactNode;
-  asideTitle: string;
-  asideText: string;
+  asideTitle?: string;
+  asideText?: string;
+  compact?: boolean;
 };
 
 export function AuthShell({
@@ -20,28 +21,33 @@ export function AuthShell({
   children,
   asideTitle,
   asideText,
+  compact = false,
 }: AuthShellProps) {
   return (
-    <main className="auth-shell">
+    <main className={`auth-shell ${compact ? "auth-shell--compact" : ""}`}>
       <section className="auth-shell__intro" aria-labelledby="auth-title">
         <Link className="auth-brand" href="/" aria-label="Leco, accueil">
           <LecoMark className="auth-brand__mark" />
-          <span>Leco</span>
+          {compact ? null : <span>Leco</span>}
         </Link>
 
         <div className="auth-shell__copy">
-          <p className="auth-eyebrow">{eyebrow}</p>
+          {eyebrow ? <p className="auth-eyebrow">{eyebrow}</p> : null}
           <h1 id="auth-title">{title}</h1>
-          <p className="auth-shell__lede">{description}</p>
+          {description ? (
+            <p className="auth-shell__lede">{description}</p>
+          ) : null}
         </div>
 
-        <div className="auth-assurance">
-          <ShieldIcon aria-hidden="true" />
-          <div>
-            <strong>{asideTitle}</strong>
-            <p>{asideText}</p>
+        {asideTitle && asideText ? (
+          <div className="auth-assurance">
+            <ShieldIcon aria-hidden="true" />
+            <div>
+              <strong>{asideTitle}</strong>
+              <p>{asideText}</p>
+            </div>
           </div>
-        </div>
+        ) : null}
       </section>
 
       <section className="auth-shell__form">{children}</section>

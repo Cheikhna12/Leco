@@ -24,9 +24,9 @@ test("routes an anonymous visitor to the real authentication flow", async ({
   await expect(page).toHaveTitle(/Leco/);
   await expect(page).toHaveURL(/\/connexion$/);
   await expect(
-    page.getByRole("heading", { level: 1, name: /Autour de toi/ }),
+    page.getByRole("heading", { level: 1, name: /Entre dans le moment/ }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Ton numéro/ })).toBeVisible();
+  await expect(page.getByLabel("Numéro mobile")).toBeVisible();
   await expect(page.locator("body")).not.toContainText(
     /données fictives|aperçu local|Awa|Mariam|Yann/i,
   );

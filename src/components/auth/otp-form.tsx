@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useEffect,
@@ -13,6 +12,7 @@ import {
 } from "react";
 
 import { ArrowIcon, LockIcon, RefreshIcon } from "@/components/ui/icons";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import { maskPhoneNumber } from "@/features/auth/phone";
 
 const OTP_LENGTH = 6;
@@ -153,16 +153,18 @@ export function OtpForm() {
 
       if (!response.ok) {
         setStatus(result.error?.code === "OTP_EXPIRED" ? "expired" : "error");
-        throw new Error(
+        setMessage(
           result.error?.message ?? "Ce code n’est pas valide ou a expiré.",
         );
+        setDigits(Array.from({ length: OTP_LENGTH }, () => ""));
+        inputs.current[0]?.focus();
+        return;
       }
 
       setStatus("success");
-      setMessage("Code confirmé. Bienvenue sur Leco.");
+      setMessage(undefined);
       sessionStorage.removeItem("leco:otp-phone");
       router.replace(result.destination || "/");
-      router.refresh();
     } catch (caughtError) {
       setMessage(
         caughtError instanceof Error
@@ -216,14 +218,11 @@ export function OtpForm() {
   return (
     <form className="auth-card auth-card--otp" onSubmit={handleSubmit}>
       <div className="auth-card__heading">
-        <span className="auth-step">02 / 02</span>
-        <h2>Entre le code</h2>
         <p>
-          Six chiffres envoyés au{" "}
+          Envoyé au{" "}
           <strong>
             {phoneNumber ? maskPhoneNumber(phoneNumber) : "numéro indiqué"}
           </strong>
-          .
         </p>
       </div>
 
@@ -232,7 +231,7 @@ export function OtpForm() {
         <div
           className="otp-inputs"
           onPaste={handlePaste}
-          aria-describedby={message ? "otp-status" : "otp-hint"}
+          aria-describedby={message ? "otp-status" : "otp-security-note"}
         >
           {digits.map((digit, index) => (
             <input
@@ -255,19 +254,19 @@ export function OtpForm() {
         </div>
       </fieldset>
 
-      <p className="auth-otp-hint" id="otp-hint">
-        Le code est temporaire et ne doit être partagé avec personne.
-      </p>
-
       {message ? (
-        <p
-          className={`auth-status auth-status--${status}`}
+        <InlineFeedback
           id="otp-status"
-          role={status === "error" || status === "expired" ? "alert" : "status"}
-          aria-live="polite"
+          tone={
+            status === "success"
+              ? "success"
+              : status === "error" || status === "expired"
+                ? "error"
+                : "neutral"
+          }
         >
           {message}
-        </p>
+        </InlineFeedback>
       ) : null}
 
       <button className="auth-submit" type="submit" disabled={pending}>
@@ -288,17 +287,17 @@ export function OtpForm() {
               ? `Nouveau code dans ${remainingSeconds} s`
               : "Renvoyer un code"}
         </button>
-        <Link
+        <a
           href="/connexion"
           onClick={() => sessionStorage.removeItem("leco:otp-phone")}
         >
           Modifier le numéro
-        </Link>
+        </a>
       </div>
 
-      <p className="auth-security-note">
+      <p className="auth-security-note" id="otp-security-note">
         <LockIcon />
-        Nous ne te demanderons jamais ce code par message.
+        Ne partage jamais ce code.
       </p>
     </form>
   );

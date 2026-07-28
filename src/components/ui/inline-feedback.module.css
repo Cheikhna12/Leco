@@ -1,0 +1,73 @@
+/* Hallmark · component: inline feedback · genre: atmospheric · theme: Lumen
+ * states: neutral · error · success
+ * contrast: pass
+ */
+/* Hallmark · pre-emit critique: P5 H4 E5 S5 R5 V4 */
+
+.root {
+  --feedback-color: var(--color-ink-2);
+  --feedback-rule: var(--color-rule-2);
+
+  align-items: center;
+  animation: feedback-enter var(--dur-short) var(--ease-out) both;
+  border-block: var(--rule-hair) solid var(--feedback-rule);
+  color: var(--feedback-color);
+  display: grid;
+  font-size: var(--text-sm);
+  gap: var(--space-xs);
+  grid-template-columns:
+    calc(var(--space-lg) + var(--space-xs))
+    minmax(0, 1fr);
+  line-height: 1.45;
+  margin: 0;
+  min-width: 0;
+  padding-block: var(--space-xs);
+}
+
+.error {
+  --feedback-color: var(--color-danger);
+  --feedback-rule: color-mix(in oklch, var(--color-danger) 38%, transparent);
+}
+
+.success {
+  --feedback-color: var(--color-success);
+  --feedback-rule: color-mix(in oklch, var(--color-success) 38%, transparent);
+}
+
+.signal {
+  color: currentColor;
+  height: var(--space-sm);
+  overflow: visible;
+  width: calc(var(--space-lg) + var(--space-xs));
+}
+
+.signal path {
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.root > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@keyframes feedback-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-3xs));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation-duration: 100ms;
+    transform: none;
+  }
+}

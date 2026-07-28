@@ -58,6 +58,10 @@
   max-width: 43rem;
 }
 
+.onboarding-step-content {
+  animation: onboarding-step-enter 320ms var(--ease-out) both;
+}
+
 .onboarding-heading {
   border-bottom: 1px solid var(--color-rule);
   margin-bottom: var(--space-lg);
@@ -79,7 +83,7 @@
   font-weight: 470;
   letter-spacing: -0.045em;
   line-height: 0.98;
-  margin-top: var(--space-xs);
+  margin-top: 0;
   text-wrap: balance;
 }
 
@@ -299,17 +303,6 @@
   opacity: 0.62;
 }
 
-.onboarding-error {
-  background: var(--color-danger-soft);
-  border-left: 3px solid var(--color-danger);
-  border-radius: var(--radius-sm);
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  line-height: 1.5;
-  margin-top: var(--space-md);
-  padding: 0.8rem 1rem;
-}
-
 .photo-studio {
   display: grid;
   gap: var(--space-sm);
@@ -427,15 +420,10 @@
   width: 3rem;
 }
 
-.photo-add small,
-.photo-note {
+.photo-add small {
   color: var(--color-muted);
   font-size: var(--text-xs);
   line-height: 1.45;
-}
-
-.photo-note {
-  margin-top: var(--space-sm);
 }
 
 .interest-counter {
@@ -515,7 +503,6 @@
   display: block;
   margin: 0 auto;
   max-width: 16rem;
-  transform: perspective(900px) rotateX(2deg);
   width: min(100%, 16rem);
 }
 
@@ -529,12 +516,6 @@
   color: var(--color-muted);
   line-height: 1.6;
   margin-top: var(--space-xs);
-}
-
-.location-consent .location-consent__error {
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  font-weight: 620;
 }
 
 .location-consent button {
@@ -552,6 +533,7 @@
 }
 
 .onboarding-success {
+  animation: onboarding-success-enter 360ms var(--ease-out) both;
   align-items: center;
   background:
     radial-gradient(
@@ -594,6 +576,30 @@
   position: absolute;
   white-space: nowrap;
   width: 1px;
+}
+
+@keyframes onboarding-step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.55rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes onboarding-success-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @media (min-width: 42rem) {
@@ -650,13 +656,6 @@
   .onboarding-rail h1 em {
     color: var(--color-accent);
     font-weight: 430;
-  }
-
-  .onboarding-rail__lede {
-    color: var(--color-muted);
-    line-height: 1.6;
-    margin-top: var(--space-md);
-    max-width: 27rem;
   }
 
   .onboarding-steps {
@@ -729,6 +728,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .onboarding-step-content,
+  .onboarding-success {
+    animation: none;
+  }
+
   .onboarding-mobile-progress i::after,
   .onboarding-field input,
   .onboarding-field textarea,

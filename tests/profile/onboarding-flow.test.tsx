@@ -110,9 +110,7 @@ describe("parcours onboarding", () => {
     );
 
     expect(geolocation.requestLocation).toHaveBeenCalledOnce();
-    expect(
-      screen.getByText(/aucun historique de déplacement/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/aucun historique/i)).toBeInTheDocument();
   });
 
   it("explique une permission bloquée sans masquer la reprise", () => {

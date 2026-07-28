@@ -10,6 +10,7 @@ export type GeolocationState =
   | "checking"
   | "requesting"
   | "ready"
+  | "insecure"
   | "denied"
   | "blocked"
   | "unavailable"
@@ -61,6 +62,8 @@ export const GEOLOCATION_MESSAGES: Readonly<
     "L’accès est bloqué dans ton navigateur. Autorise Leco depuis les réglages du site.",
   denied: "Tu as refusé l’accès. Rien n’a été enregistré.",
   error: "La position n’a pas pu être vérifiée. Réessaie dans un instant.",
+  insecure:
+    "La localisation est bloquée sur une adresse HTTP. Ouvre Leco en HTTPS ou utilise localhost sur cet appareil.",
   inaccurate:
     "Le signal est trop imprécis. Place-toi près d’une fenêtre puis réessaie.",
   timeout:
@@ -71,21 +74,36 @@ export const GEOLOCATION_MESSAGES: Readonly<
 };
 
 export function useGeolocation(): GeolocationController {
+  const insecure =
+    typeof window !== "undefined" && window.isSecureContext === false;
   const unsupported =
     typeof navigator !== "undefined" && !navigator.geolocation;
   const [state, setState] = useState<GeolocationState>(
-    unsupported ? "unsupported" : "idle",
+    insecure ? "insecure" : unsupported ? "unsupported" : "idle",
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(
-    unsupported ? (GEOLOCATION_MESSAGES.unsupported ?? null) : null,
+    insecure
+      ? (GEOLOCATION_MESSAGES.insecure ?? null)
+      : unsupported
+        ? (GEOLOCATION_MESSAGES.unsupported ?? null)
+        : null,
   );
 
   const reset = useCallback(() => {
-    setState("idle");
-    setErrorMessage(null);
+    const isInsecure = window.isSecureContext === false;
+    setState(isInsecure ? "insecure" : "idle");
+    setErrorMessage(
+      isInsecure ? (GEOLOCATION_MESSAGES.insecure ?? null) : null,
+    );
   }, []);
 
   const requestLocation = useCallback(async () => {
+    if (window.isSecureContext === false) {
+      setState("insecure");
+      setErrorMessage(GEOLOCATION_MESSAGES.insecure ?? null);
+      return false;
+    }
+
     if (!navigator.geolocation) {
       setState("unsupported");
       setErrorMessage(GEOLOCATION_MESSAGES.unsupported ?? null);
@@ -98,9 +116,16 @@ export function useGeolocation(): GeolocationController {
 
     try {
       if ("permissions" in navigator) {
-        permissionState = (
-          await navigator.permissions.query({ name: "geolocation" })
-        ).state;
+        try {
+          permissionState = (
+            await navigator.permissions.query({ name: "geolocation" })
+          ).state;
+        } catch {
+          // Certains navigateurs exposent l’API Permissions sans prendre en
+          // charge la requête "geolocation". Le dialogue GPS natif reste la
+          // source de vérité dans ce cas.
+          permissionState = undefined;
+        }
 
         if (permissionState === "denied") {
           setState("blocked");
@@ -138,7 +163,11 @@ export function useGeolocation(): GeolocationController {
             )
           : "error";
       setState(nextState);
-      setErrorMessage(GEOLOCATION_MESSAGES[nextState] ?? null);
+      setErrorMessage(
+        nextState === "error" && error instanceof Error
+          ? error.message
+          : (GEOLOCATION_MESSAGES[nextState] ?? null),
+      );
       return false;
     }
   }, []);

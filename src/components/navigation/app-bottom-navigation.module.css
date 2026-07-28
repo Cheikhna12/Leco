@@ -1,0 +1,91 @@
+.clearance {
+  background: var(--color-paper);
+  height: calc(4.25rem + env(safe-area-inset-bottom));
+}
+
+.dock {
+  align-items: center;
+  backdrop-filter: blur(18px) saturate(115%);
+  background: color-mix(in oklch, var(--color-paper-2) 86%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-rule-2) 72%, transparent);
+  border-radius: var(--radius-pill);
+  bottom: max(0.55rem, env(safe-area-inset-bottom));
+  box-shadow: 0 0.45rem 1.4rem
+    color-mix(in oklch, var(--color-shadow) 55%, transparent);
+  display: grid;
+  gap: 0.2rem;
+  grid-auto-flow: column;
+  left: 50%;
+  padding: 0.22rem;
+  position: fixed;
+  transform: translateX(-50%);
+  width: max-content;
+  z-index: 30;
+}
+
+.link {
+  align-items: center;
+  border-radius: 50%;
+  color: var(--color-muted);
+  display: inline-flex;
+  height: 3rem;
+  justify-content: center;
+  position: relative;
+  text-decoration: none;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+  width: 3rem;
+}
+
+.link svg {
+  height: 1.3rem;
+  width: 1.3rem;
+}
+
+.link span {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.link[aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.link[aria-current="page"]::after {
+  background: currentColor;
+  border-radius: var(--radius-pill);
+  bottom: 0.35rem;
+  content: "";
+  height: 0.12rem;
+  position: absolute;
+  width: 0.7rem;
+}
+
+@media (hover: hover) {
+  .link:not([aria-current="page"]):hover {
+    background: color-mix(in oklch, var(--color-paper-4) 64%, transparent);
+    color: var(--color-ink);
+  }
+}
+
+@media (min-width: 48rem) {
+  .dock {
+    bottom: 1.25rem;
+    left: auto;
+    right: 1.25rem;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link {
+    transition: none;
+  }
+}

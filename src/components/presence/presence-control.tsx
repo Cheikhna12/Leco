@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { LecoMark } from "@/components/ui/leco-mark";
-import { LockIcon, ShieldIcon } from "@/components/ui/icons";
+import { LockIcon, VibeIcon } from "@/components/ui/icons";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   MOODS,
   MOOD_PRESENTATION,
@@ -92,52 +93,24 @@ export function PresenceControl() {
 
         <div className={styles.layout}>
           <section className={styles.intro}>
-            <span className={styles.eyebrow}>Présence temporaire</span>
             <h1>
               Dispo, juste <em>maintenant.</em>
             </h1>
-            <p className={styles.lede}>
-              Choisis ton intention, garde le contrôle du temps et repasse hors
-              ligne en un geste. Leco ne montre jamais ton point GPS.
-            </p>
             <div className={styles.signal} data-active={active}>
-              <span aria-hidden="true" className={styles.signalMark} />
+              <span aria-hidden="true" className={styles.signalMark}>
+                <VibeIcon className={styles.signalIcon} />
+              </span>
               <span>
-                <strong>{active ? "Signal actif" : "Signal éteint"}</strong>
-                <small>
-                  {active
-                    ? `Expiration automatique dans ${remaining}`
-                    : "Tu n’apparais pas dans la découverte"}
-                </small>
+                <strong>{active ? "Actif" : "Inactif"}</strong>
               </span>
             </div>
           </section>
 
           <section
             aria-busy={presence.loading || presence.pending}
-            aria-labelledby="presence-title"
+            aria-label="Présence"
             className={styles.panel}
           >
-            <header className={styles.panelHeader}>
-              <div>
-                <h2 id="presence-title">
-                  {active ? "Je suis dispo" : "Je suis off"}
-                </h2>
-                <p>
-                  {active
-                    ? "Le heartbeat maintient ta présence."
-                    : "Aucune présence n’est diffusée."}
-                </p>
-              </div>
-              <span
-                className={`${styles.status} ${
-                  active ? styles.statusActive : ""
-                }`}
-              >
-                {active ? "En ligne" : "Hors ligne"}
-              </span>
-            </header>
-
             <div aria-live="polite" className={styles.body}>
               {presence.loading ? (
                 <p>Vérification de ta présence…</p>
@@ -149,7 +122,6 @@ export function PresenceControl() {
                   </div>
                   <div>
                     <p className={styles.activeMood}>{activeMood?.label}</p>
-                    <p className={styles.activeCopy}>{activeMood?.detail}</p>
                   </div>
                   <p className={styles.activeMeta}>
                     Secteur approximatif
@@ -157,9 +129,9 @@ export function PresenceControl() {
                     arrêt automatique
                   </p>
                   {presence.error ? (
-                    <p className={styles.error} role="alert">
+                    <InlineFeedback live="assertive">
                       {presence.error}
-                    </p>
+                    </InlineFeedback>
                   ) : null}
                   <button
                     className={styles.secondary}
@@ -175,10 +147,9 @@ export function PresenceControl() {
                   <fieldset className={styles.fieldset}>
                     <legend className={styles.legend}>
                       <strong>Ton mood</strong>
-                      <span>1 choix</span>
                     </legend>
                     <div className={styles.moods}>
-                      {MOODS.map((value, index) => (
+                      {MOODS.map((value) => (
                         <button
                           aria-pressed={mood === value}
                           className={styles.mood}
@@ -186,11 +157,7 @@ export function PresenceControl() {
                           onClick={() => setMood(value)}
                           type="button"
                         >
-                          <span aria-hidden="true" className={styles.moodIndex}>
-                            {String(index + 1).padStart(2, "0")}
-                          </span>
                           <strong>{MOOD_PRESENTATION[value].label}</strong>
-                          <small>{MOOD_PRESENTATION[value].detail}</small>
                         </button>
                       ))}
                     </div>
@@ -199,7 +166,6 @@ export function PresenceControl() {
                   <fieldset className={styles.fieldset}>
                     <legend className={styles.legend}>
                       <strong>Durée</strong>
-                      <span>expiration automatique</span>
                     </legend>
                     <div className={styles.durations}>
                       {PRESENCE_DURATIONS.map((value) => (
@@ -218,9 +184,9 @@ export function PresenceControl() {
                   </fieldset>
 
                   {presence.error ? (
-                    <p className={styles.error} role="alert">
+                    <InlineFeedback live="assertive">
                       {presence.error}
-                    </p>
+                    </InlineFeedback>
                   ) : null}
 
                   <button
@@ -242,34 +208,27 @@ export function PresenceControl() {
                   </div>
                   <div>
                     <h3>Un secteur, jamais un point.</h3>
-                    <p>
-                      Ta position nous aide à te montrer les personnes actives
-                      autour de toi. Ta position exacte n’est jamais montrée aux
-                      autres utilisateurs.
-                    </p>
                   </div>
                   <div className={styles.assurances}>
-                    <div className={styles.assurance}>
-                      <ShieldIcon aria-hidden="true" />
-                      Remplacée à chaque nouvelle mise à jour
-                    </div>
                     <div className={styles.assurance}>
                       <LockIcon aria-hidden="true" />
                       Supprimée dès que tu repasses hors ligne
                     </div>
                   </div>
                   {showLocationError ? (
-                    <p className={styles.error} role="alert">
+                    <InlineFeedback live="assertive">
                       {location.errorMessage ??
                         GEOLOCATION_MESSAGES.error ??
                         "Réessaie dans un instant."}
-                    </p>
+                    </InlineFeedback>
                   ) : null}
                   <button
                     className={styles.primary}
                     disabled={
                       location.state === "checking" ||
-                      location.state === "requesting"
+                      location.state === "requesting" ||
+                      location.state === "insecure" ||
+                      location.state === "unsupported"
                     }
                     onClick={() => void allowLocation()}
                     type="button"
@@ -278,7 +237,9 @@ export function PresenceControl() {
                       ? "Vérification…"
                       : location.state === "requesting"
                         ? "Localisation…"
-                        : "Autoriser pour continuer"}
+                        : location.state === "insecure"
+                          ? "Ouvre Leco en HTTPS"
+                          : "Autoriser pour continuer"}
                   </button>
                   <button
                     className={styles.secondary}
@@ -297,17 +258,10 @@ export function PresenceControl() {
                     <span className={styles.orbit} />
                     <span className={styles.core} />
                   </div>
-                  <div>
-                    <h3>Allumer ton signal</h3>
-                    <p>
-                      Tu choisiras d’abord ce que tu veux faire et pendant
-                      combien de temps. Rien ne démarre sans ton accord.
-                    </p>
-                  </div>
                   {presence.error ? (
-                    <p className={styles.error} role="alert">
+                    <InlineFeedback live="assertive">
                       {presence.error}
-                    </p>
+                    </InlineFeedback>
                   ) : null}
                   <button
                     className={styles.primary}

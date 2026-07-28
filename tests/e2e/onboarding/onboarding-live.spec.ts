@@ -57,7 +57,7 @@ test.describe("onboarding local réel", () => {
 
     await expect(page.getByRole("group", { name: /ton mood/i })).toBeVisible();
     await page.getByRole("button", { name: /je suis dispo/i }).click();
-    await expect(page.getByText("Signal actif")).toBeVisible();
+    await expect(page.getByText("Actif", { exact: true })).toBeVisible();
 
     const heartbeat = await page.evaluate(async () => {
       const response = await fetch("/api/presence/heartbeat", {
@@ -69,7 +69,7 @@ test.describe("onboarding local réel", () => {
     expect(heartbeat.body).not.toMatch(/latitude|longitude|5\.3364|-4\.0267/i);
 
     await page.getByRole("button", { name: "Je suis off" }).last().click();
-    await expect(page.getByText("Signal éteint")).toBeVisible();
+    await expect(page.getByText("Inactif", { exact: true })).toBeVisible();
 
     const logout = await page.evaluate(async () => {
       const response = await fetch("/api/auth/logout", { method: "POST" });

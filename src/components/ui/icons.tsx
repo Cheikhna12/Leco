@@ -33,6 +33,26 @@ export function SparkIcon(props: IconProps) {
   );
 }
 
+export function VibeIcon(props: IconProps) {
+  return (
+    <IconFrame {...props}>
+      <circle cx="12" cy="12" r="2.1" fill="currentColor" />
+      <path
+        d="M8.45 8.45a5.02 5.02 0 0 0 0 7.1M15.55 8.45a5.02 5.02 0 0 1 0 7.1"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.75"
+      />
+      <path
+        d="M5.4 5.55a9.05 9.05 0 0 0 0 12.9M18.6 5.55a9.05 9.05 0 0 1 0 12.9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.75"
+      />
+    </IconFrame>
+  );
+}
+
 export function CompassIcon(props: IconProps) {
   return (
     <IconFrame {...props}>

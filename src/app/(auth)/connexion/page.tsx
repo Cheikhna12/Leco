@@ -11,17 +11,23 @@ export const metadata: Metadata = {
 export default function ConnectionPage() {
   return (
     <AuthShell
-      eyebrow="Entrer dans le moment"
+      compact
       title={
-        <>
-          Autour de toi,
-          <br />
-          la ville est <em>vivante.</em>
-        </>
+        <span aria-label="Entre dans le moment." className="auth-title-scene">
+          <span aria-hidden="true" className="auth-title-line">
+            <span>Entre dans</span>
+          </span>
+          <span aria-hidden="true" className="auth-title-line">
+            <span>
+              le{" "}
+              <em className="auth-title-moment">
+                moment<span className="auth-title-stop">.</span>
+                <span className="auth-title-trace" />
+              </em>
+            </span>
+          </span>
+        </span>
       }
-      description="Un numéro, un code, puis tu décides quand tu veux être visible. Rien de plus."
-      asideTitle="Présent seulement quand tu le choisis"
-      asideText="Ta position exacte et ton numéro ne sont jamais montrés aux autres membres."
     >
       <PhoneForm />
     </AuthShell>

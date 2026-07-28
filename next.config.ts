@@ -19,7 +19,7 @@ const securityHeaders = buildSecurityHeaders({
 );
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["127.0.0.1", "192.168.1.176"],
+  allowedDevOrigins: ["127.0.0.1", "192.168.1.76", "192.168.1.176"],
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   reactStrictMode: true,
   poweredByHeader: false,

@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type FormEvent } from "react";
 
-import { ArrowIcon, LockIcon } from "@/components/ui/icons";
+import { ArrowIcon } from "@/components/ui/icons";
+import { InlineFeedback } from "@/components/ui/inline-feedback";
 import {
   isIvoryCoastMobilePhone,
   normalizeIvoryCoastPhone,
@@ -79,14 +80,8 @@ export function PhoneForm() {
 
   return (
     <form className="auth-card" onSubmit={handleSubmit} noValidate>
-      <div className="auth-card__heading">
-        <span className="auth-step">01 / 02</span>
-        <h2>Ton numéro</h2>
-        <p>Nous t’enverrons un code à usage unique.</p>
-      </div>
-
       <label className="auth-field" htmlFor="phone">
-        <span>Numéro mobile</span>
+        <span className="sr-only">Numéro mobile</span>
         <span className="auth-phone">
           <span className="auth-phone__prefix" aria-hidden="true">
             CI&nbsp;&nbsp;+225
@@ -109,7 +104,7 @@ export function PhoneForm() {
             required
           />
         </span>
-        <small id="phone-hint">Formats mobiles 01, 05 ou 07.</small>
+        <small id="phone-hint">01, 05 ou 07</small>
       </label>
 
       <label className="auth-consent">
@@ -136,20 +131,15 @@ export function PhoneForm() {
       ) : null}
 
       {error ? (
-        <p className="auth-error" id="phone-error" role="alert">
+        <InlineFeedback id="phone-error" live="assertive">
           {error}
-        </p>
+        </InlineFeedback>
       ) : null}
 
       <button className="auth-submit" type="submit" disabled={pending}>
         <span>{pending ? "Envoi en cours…" : "Recevoir mon code"}</span>
         <ArrowIcon />
       </button>
-
-      <p className="auth-security-note">
-        <LockIcon />
-        Ton numéro reste privé et n’apparaît jamais sur ton profil.
-      </p>
     </form>
   );
 }

@@ -79,12 +79,7 @@ describe("PresenceControl", () => {
       screen.getByRole("button", { name: "Je veux être visible" }),
     );
 
-    expect(
-      screen.getByText(/Ta position nous aide à te montrer/i),
-    ).toBeVisible();
-    expect(
-      screen.getByText(/Ta position exacte n’est jamais montrée/i),
-    ).toBeVisible();
+    expect(screen.getByText(/Un secteur, jamais un point/i)).toBeVisible();
     expect(requestLocation).not.toHaveBeenCalled();
   });
 

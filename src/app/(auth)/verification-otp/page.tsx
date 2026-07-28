@@ -11,17 +11,11 @@ export const metadata: Metadata = {
 export default function VerificationOtpPage() {
   return (
     <AuthShell
-      eyebrow="Vérification privée"
       title={
         <>
-          Une dernière
-          <br />
-          étape, <em>juste toi.</em>
+          Confirme ton <em>code.</em>
         </>
       }
-      description="Le code confirme ton numéro sans mot de passe à mémoriser."
-      asideTitle="Une session protégée"
-      asideText="Le code expire rapidement. Ta session est ensuite conservée dans des cookies sécurisés."
     >
       <OtpForm />
     </AuthShell>
